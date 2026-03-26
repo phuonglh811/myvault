@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="MyVault">
+<meta name="theme-color" content="#0a0a0f">
+<title>MyVault</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<style>
+:root{--bg:#0a0a0f;--sf:#13131a;--sf2:#1c1c27;--sf3:#242433;--bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);--tx:#f0f0f8;--tx2:#8888aa;--tx3:#55556a;--ac:#7c6af7;--ac2:#a598ff;--gn:#34d399;--rd:#f87171;--rr:14px;--rs:8px;--fn:'DM Sans',sans-serif;--mo:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--fn);font-size:15px;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+#lock-screen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px}
+.lglow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(124,106,247,.15) 0%,transparent 70%);pointer-events:none}
+.llogo{font-size:12px;font-weight:600;letter-spacing:3px;color:var(--tx3);text-transform:uppercase;margin-bottom:36px}
+.llogo span{color:var(--ac2)}
+.licon{width:76px;height:76px;border-radius:22px;background:var(--sf2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:24px}
+.ltitle{font-size:26px;font-weight:600;margin-bottom:6px}
+.lsub{color:var(--tx2);font-size:14px;margin-bottom:32px;text-align:center;line-height:1.6}
+.lform{width:100%;max-width:320px}
+.lerr{color:var(--rd);font-size:13px;text-align:center;margin-top:10px;display:none}
+
+#app{display:none;max-width:680px;margin:0 auto;padding-bottom:70px;min-height:100vh}
+
+.topbar{position:sticky;top:0;z-index:20;background:rgba(10,10,15,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.tlogo{font-size:12px;font-weight:600;letter-spacing:2.5px;color:var(--tx3);text-transform:uppercase;flex-shrink:0}
+.tlogo span{color:var(--ac2)}
+.tsearch{flex:1;position:relative;display:none;align-items:center}
+.tsearch.show{display:flex}
+.tsearch svg{position:absolute;left:10px;width:15px;height:15px;stroke:var(--tx3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;flex-shrink:0}
+.tsearch input{width:100%;padding:8px 12px 8px 34px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:14px;font-family:var(--fn);outline:none}
+.tsearch input:focus{border-color:var(--ac)}
+.tsearch input::placeholder{color:var(--tx3)}
+.tbtns{display:flex;gap:6px;flex-shrink:0}
+.ib{width:34px;height:34px;border-radius:var(--rs);background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ib svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ib:hover{border-color:var(--bd2);color:var(--tx)}
+
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;background:rgba(13,13,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd);display:flex;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nb{flex:1;padding:9px 4px 7px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tx3)}
+.nb svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nb span{font-size:10px;font-weight:500;font-family:var(--fn)}
+.nb.active{color:var(--ac2)}
+
+.panel{display:none;padding:14px 14px 0}
+.panel.active{display:block}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--fn);transition:opacity .15s}
+.btn:active{opacity:.75}
+.btn-p{background:var(--ac);color:#fff}
+.btn-g{background:var(--sf2);color:var(--tx2);border:1px solid var(--bd)}
+.btn-d{background:rgba(248,113,113,.1);color:var(--rd);border:1px solid rgba(248,113,113,.2)}
+.btn-sm{padding:7px 13px;font-size:13px}
+.btn-full{width:100%}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--tx3);margin-bottom:5px}
+.iw{position:relative}
+input[type=text],input[type=password],input[type=url],textarea,select{width:100%;padding:10px 13px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:14px;font-family:var(--fn);outline:none;-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);background:var(--sf3)}
+input::placeholder,textarea::placeholder{color:var(--tx3)}
+.ia{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx3);font-size:15px;padding:3px}
+.iwa input{padding-right:40px}
+textarea{resize:vertical;min-height:76px;line-height:1.5}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2355556a' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+select option{background:#1c1c27}
+
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rr);padding:16px;margin-bottom:12px}
+
+.stats{display:flex;gap:10px;margin-bottom:16px}
+.sc{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rr);padding:13px 10px;text-align:center}
+.sn{font-size:22px;font-weight:600;color:var(--ac2);line-height:1;margin-bottom:3px}
+.sl{font-size:10px;color:var(--tx3);letter-spacing:.4px;text-transform:uppercase}
+
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--fn)}
+.chip.active{background:var(--ac);border-color:var(--ac);color:#fff}
+
+.lw{border-radius:var(--rr);overflow:hidden;border:1px solid var(--bd)}
+.ai{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--sf);cursor:pointer;border-bottom:1px solid var(--bd)}
+.ai:last-child{border-bottom:none}
+.ai:active,.ai:hover{background:var(--sf2)}
+.av{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;flex-shrink:0}
+.ainfo{flex:1;min-width:0}
+.an{font-weight:600;font-size:15px;margin-bottom:2px}
+.am{display:flex;align-items:center;gap:7px}
+.au{font-size:13px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px}
+.at{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--sf3);color:var(--tx3);flex-shrink:0}
+.ach{color:var(--tx3);font-size:18px}
+.empty{text-align:center;padding:52px 20px}
+.ei{font-size:36px;margin-bottom:10px}
+.et{font-size:16px;font-weight:600;margin-bottom:5px}
+.es{font-size:13px;color:var(--tx2)}
+
+#dov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+#dov.open{display:flex}
+#drawer{background:var(--sf);border-radius:20px 20px 0 0;border:1px solid var(--bd2);border-bottom:none;padding:8px 18px 40px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;animation:su .22s cubic-bezier(.16,1,.3,1)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.dh{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:8px auto 18px}
+.dt{font-size:19px;font-weight:600;margin-bottom:18px}
+
+.pwd{font-family:var(--mo);font-size:16px;letter-spacing:1px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 13px;word-break:break-all;line-height:1.5;min-height:46px;color:var(--ac2)}
+.pwd.locked{color:var(--tx3);letter-spacing:3px;font-size:13px}
+.pwd.locked::before{content:"- - - - - - - - - -"}
+
+.dz{border:2px dashed var(--bd2);border-radius:var(--rr);padding:28px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--sf)}
+.dz:hover,.dz.over{border-color:var(--ac);background:rgba(124,106,247,.06)}
+.dzi{font-size:28px;margin-bottom:8px}
+.dzt{font-size:15px;font-weight:600;margin-bottom:3px}
+.dzs{font-size:13px;color:var(--tx2)}
+#iprev{margin-top:12px;display:none;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden}
+.ipr{display:flex;gap:10px;padding:9px 13px;border-bottom:1px solid var(--bd);font-size:13px}
+.ipr:last-child{border-bottom:none}
+.ipr.hdr{color:var(--tx3);font-weight:600;background:var(--sf3);font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+.ic1{width:110px;flex-shrink:0;font-weight:500}.ic2{flex:1;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ic3{width:75px;flex-shrink:0;color:var(--tx3)}
+
+.sg{margin-bottom:14px}
+.sgl{font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--tx3);padding:0 3px;margin-bottom:6px}
+.sgw{border-radius:var(--rr);overflow:hidden;border:1px solid var(--bd)}
+.si{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;background:var(--sf);cursor:pointer;border-bottom:1px solid var(--bd)}
+.si:last-child{border-bottom:none}
+.si:hover{background:var(--sf2)}
+.sil{display:flex;align-items:center;gap:11px}
+.sico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sico svg{width:15px;height:15px;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.stit{font-size:15px;font-weight:500}
+.shit{font-size:12px;color:var(--tx3);margin-top:1px}
+.sir{color:var(--tx3)}
+
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);padding:9px 18px;border-radius:20px;font-size:14px;z-index:999;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;max-width:86vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.slbl{font-size:11px;font-weight:600;letter-spacing:.7px;color:var(--tx3);text-transform:uppercase;padding:3px 2px 10px}
+.ibox{background:rgba(124,106,247,.08);border:1px solid rgba(124,106,247,.2);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:13px}
+.wbox{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:#fde68a;line-height:1.6;margin-bottom:13px}
+
+.av0{background:linear-gradient(135deg,#7c6af7,#a598ff)}.av1{background:linear-gradient(135deg,#06b6d4,#67e8f9)}.av2{background:linear-gradient(135deg,#10b981,#6ee7b7)}.av3{background:linear-gradient(135deg,#f59e0b,#fcd34d)}.av4{background:linear-gradient(135deg,#ef4444,#fca5a5)}.av5{background:linear-gradient(135deg,#8b5cf6,#c4b5fd)}.av6{background:linear-gradient(135deg,#ec4899,#f9a8d4)}.av7{background:linear-gradient(135deg,#3b82f6,#93c5fd)}.av8{background:linear-gradient(135deg,#14b8a6,#5eead4)}.av9{background:linear-gradient(135deg,#f97316,#fdba74)}
+</style>
+</head>
+<body>
+
+<div id="lock-screen">
+  <div class="lglow"></div>
+  <div class="llogo">My<span>Vault</span></div>
+  <div class="licon">&#128274;</div>
+  <div class="ltitle">Welcome back</div>
+  <div class="lsub">Enter your Master Password to<br>decrypt and access your vault.</div>
+  <div class="lform">
+    <div class="field iw iwa">
+      <input type="password" id="master-input" placeholder="Master Password" autocomplete="off" onkeydown="if(event.key==='Enter')doUnlock()">
+      <button class="ia" onclick="toggleEye('master-input',this)" type="button">&#128065;</button>
+    </div>
+    <button class="btn btn-p btn-full" onclick="doUnlock()">Unlock Vault</button>
+    <div id="lerr" class="lerr">Incorrect password or data error</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="tlogo">My<span>Vault</span></div>
+    <div class="tsearch" id="srchwrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      <input type="text" id="srch" placeholder="Search services, usernames, types..." oninput="onSearch()">
+    </div>
+    <div class="tbtns">
+      <button class="ib" id="srch-btn" onclick="toggleSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
+      <button class="ib" onclick="loadAccounts()" title="Refresh"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+      <button class="ib" onclick="doLock()" title="Lock"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>
+    </div>
+  </div>
+
+  <div class="panel active" id="panel-vault">
+    <div style="padding:4px 0 2px"><div class="chips" id="chips"></div></div>
+    <div id="acc-list"><div class="empty"><div class="ei">&#128274;</div><div class="et">Loading vault...</div></div></div>
+  </div>
+
+  <div class="panel" id="panel-add">
+    <div class="slbl" id="add-lbl">New Account</div>
+    <div class="card" style="padding:18px">
+      <div class="wbox">&#128274; Encryption happens on this device. Server only receives encrypted data.</div>
+      <div class="field"><label>Service Name *</label><input type="text" id="f-service" placeholder="Gmail, Facebook, Netflix..."></div>
+      <div class="field"><label>Username / Email *</label><input type="text" id="f-user" placeholder="your@email.com" autocomplete="off"></div>
+      <div class="field"><label>Password *</label><div class="iw iwa"><input type="password" id="f-pw" placeholder="Service password" autocomplete="new-password"><button class="ia" onclick="toggleEye('f-pw',this)" type="button">&#128065;</button></div></div>
+      <div class="field"><label>Category</label>
+        <select id="f-type"><option value="General">General</option><option value="Work">Work</option><option value="Social">Social</option><option value="Finance">Finance</option><option value="Shopping">Shopping</option><option value="Entertainment">Entertainment</option><option value="Other">Other</option></select>
+      </div>
+      <div class="field"><label>URL (optional)</label><input type="text" id="f-url" placeholder="https://..."></div>
+      <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Security questions, PINs..."></textarea></div>
+      <div class="brow">
+        <button class="btn btn-p" style="flex:1" id="save-btn" onclick="doSave()">&#128274; Encrypt &amp; Save</button>
+        <button class="btn btn-g btn-sm" onclick="resetForm();showPanel('vault')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-import">
+    <div class="slbl">Import Accounts</div>
+    <div class="ibox">Upload a <strong>CSV</strong> file. Passwords are encrypted on your device before upload.</div>
+    <div class="card" style="padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px">Template Columns</span>
+        <button class="btn btn-g btn-sm" onclick="dlTpl()">&#11015; Download CSV</button>
+      </div>
+      <div style="font-size:13px;color:var(--tx2);font-family:var(--mo);background:var(--sf2);padding:9px 11px;border-radius:7px;line-height:1.8">service_name, username, password, type, url, notes</div>
+    </div>
+    <div class="dz" id="dropzone" onclick="document.getElementById('fi').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+      <div class="dzi">&#128196;</div>
+      <div class="dzt">Drop CSV here or click to browse</div>
+      <div class="dzs">Excel: File > Save As > CSV first</div>
+      <input type="file" id="fi" accept=".csv" style="display:none" onchange="onFileSel(event)">
+    </div>
+    <div id="iprev"></div>
+    <div id="iact" style="display:none;margin-top:12px">
+      <div class="wbox" id="iwarn"></div>
+      <div class="brow">
+        <button class="btn btn-p" style="flex:1" id="ibtn" onclick="doImport()">&#128274; Encrypt &amp; Import</button>
+        <button class="btn btn-g btn-sm" onclick="clearImport()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-settings">
+    <div class="stats" style="margin-bottom:18px">
+      <div class="sc"><div class="sn" id="stat-n">0</div><div class="sl">Accounts</div></div>
+      <div class="sc"><div class="sn" style="font-size:16px;padding-top:3px">AES-256</div><div class="sl">Encryption</div></div>
+      <div class="sc"><div class="sn" style="font-size:14px;padding-top:5px;color:var(--gn)">E2E</div><div class="sl">Zero-Knowledge</div></div>
+    </div>
+    <div class="sg">
+      <div class="sgl">Data</div>
+      <div class="sgw">
+        <div class="si" onclick="doBackup()">
+          <div class="sil"><div class="sico" style="background:rgba(52,211,153,.12)"><svg stroke="#34d399" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+            <div><div class="stit">Export Backup</div><div class="shit">Download encrypted JSON backup</div></div></div>
+          <div class="sir">&#8250;</div>
+        </div>
+        <div class="si" onclick="showPanel('import')">
+          <div class="sil"><div class="sico" style="background:rgba(124,106,247,.12)"><svg stroke="#a598ff" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div><div class="stit">Import Accounts</div><div class="shit">From CSV file</div></div></div>
+          <div class="sir">&#8250;</div>
+        </div>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sgl">Security</div>
+      <div class="sgw">
+        <div class="si" onclick="showChangePw()">
+          <div class="sil"><div class="sico" style="background:rgba(251,191,36,.12)"><svg stroke="#fbbf24" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <div><div class="stit">Change Master Password</div><div class="shit">Re-encrypts all data</div></div></div>
+          <div class="sir">&#8250;</div>
+        </div>
+        <div class="si" onclick="doLock()">
+          <div class="sil"><div class="sico" style="background:rgba(248,113,113,.12)"><svg stroke="#f87171" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+            <div><div class="stit">Lock Vault</div><div class="shit">Clears memory, back to lock screen</div></div></div>
+          <div class="sir">&#8250;</div>
+        </div>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sgl">Install as App</div>
+      <div class="ibox" style="margin-bottom:0">
+        <strong>iPhone/iPad:</strong> Safari &rarr; Share button &rarr; "Add to Home Screen"<br>
+        <strong>Android:</strong> Chrome menu (&vellip;) &rarr; "Add to Home Screen"<br>
+        <strong>Desktop:</strong> Chrome address bar &rarr; install icon (&#8853;)
+      </div>
+    </div>
+  </div>
+
+  <nav class="bnav">
+    <button class="nb active" id="nav-vault" onclick="showPanel('vault')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Vault</span>
+    </button>
+    <button class="nb" id="nav-add" onclick="showPanel('add')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>Add</span>
+    </button>
+    <button class="nb" id="nav-import" onclick="showPanel('import')">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Import</span>
+    </button>
+    <button class="nb" id="nav-settings" onclick="showPanel('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+</div>
+
+<div id="dov" onclick="if(event.target===this)closeDrawer()">
+  <div id="drawer"><div class="dh"></div><div id="dbody"></div></div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ── Replace with your GAS Web App URL ──────────────
+var GAS_URL = "https://script.google.com/macros/s/AKfycbyLvBAUeRWSQvbbzcmoWoMBl0GEG7S0ofPodEFcCmKxXXvfyr1Q2IOKh70mj6G14LN2/exec";
+// ─────────────────────────────────────────────────────────────
+
+var MASTER="", DATA=[], FILTER="All", SEARCH="", EDIT_ID=null, IROWS=[], SRCH=false;
+
+// ── API CALLS (fetch instead of google.script.run) ───────────
+function apiGet(params) {
+  var url = GAS_URL + "?" + Object.keys(params).map(function(k){ return k+"="+encodeURIComponent(params[k]); }).join("&");
+  return fetch(url).then(function(r){ return r.json(); });
+}
+function apiPost(body) {
+  return fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(body)
+  }).then(function(r){ return r.json(); });
+}
+
+// ── AUTH ─────────────────────────────────────────────────────
+function doUnlock() {
+  var pw = document.getElementById("master-input").value;
+  if (!pw) return;
+  MASTER = pw;
+  document.getElementById("lock-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("lerr").style.display = "none";
+  loadAccounts();
+}
+function doLock() {
+  MASTER=""; DATA=[]; FILTER="All"; SEARCH="";
+  document.getElementById("master-input").value = "";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("lock-screen").style.display = "flex";
+  closeDrawer();
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────
+function showPanel(n) {
+  document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("active"); });
+  document.querySelectorAll(".nb").forEach(function(b){ b.classList.remove("active"); });
+  document.getElementById("panel-"+n).classList.add("active");
+  var nb = document.getElementById("nav-"+n); if (nb) nb.classList.add("active");
+  var sw = document.getElementById("srchwrap");
+  if (n === "vault") { sw.classList.add("show"); document.getElementById("srch-btn").style.display="none"; renderList(); }
+  else { sw.classList.remove("show"); document.getElementById("srch-btn").style.display="flex"; }
+  if (n === "settings") document.getElementById("stat-n").textContent = DATA.length;
+}
+function toggleSearch() {
+  SRCH = !SRCH;
+  var sw = document.getElementById("srchwrap");
+  sw.classList.toggle("show", SRCH);
+  if (SRCH) sw.querySelector("input").focus();
+  else { document.getElementById("srch").value=""; SEARCH=""; renderList(); }
+}
+
+// ── DATA ─────────────────────────────────────────────────────
+function loadAccounts() {
+  document.getElementById("acc-list").innerHTML = '<div class="empty"><div class="et">Loading...</div></div>';
+  apiGet({ action: "getAccounts" })
+    .then(function(rows) {
+      DATA = rows || [];
+      buildChips();
+      renderList();
+    })
+    .catch(function(e) {
+      document.getElementById("acc-list").innerHTML = '<div class="empty"><div class="ei">&#9888;</div><div class="et">Load failed</div><div class="es">'+esc(e.message)+'</div></div>';
+    });
+}
+
+function buildChips() {
+  var types = ["All"];
+  for (var i=0; i<DATA.length; i++) { var t=DATA[i].type||"General"; if(types.indexOf(t)<0) types.push(t); }
+  var html = "";
+  for (var j=0; j<types.length; j++) {
+    html += '<button class="chip'+(FILTER===types[j]?" active":"")+'" onclick="setFilter(\''+esc(types[j])+'\')">'+esc(types[j])+'</button>';
+  }
+  document.getElementById("chips").innerHTML = html;
+}
+function setFilter(f) { FILTER=f; buildChips(); renderList(); }
+function onSearch() { SEARCH=document.getElementById("srch").value.toLowerCase(); renderList(); }
+
+function renderList() {
+  var q=SEARCH, filtered=[];
+  for (var i=0; i<DATA.length; i++) {
+    var a=DATA[i];
+    if (FILTER!=="All" && (a.type||"General")!==FILTER) continue;
+    if (q && a.service_name.toLowerCase().indexOf(q)<0 && a.username.toLowerCase().indexOf(q)<0 &&
+        (a.type||"").toLowerCase().indexOf(q)<0 && (a.url||"").toLowerCase().indexOf(q)<0) continue;
+    filtered.push(a);
+  }
+  var el = document.getElementById("acc-list");
+  if (!filtered.length) {
+    el.innerHTML='<div class="empty"><div class="ei">&#128274;</div><div class="et">'+(DATA.length?"No results":"Vault is empty")+'</div><div class="es">'+(DATA.length?"Try different search":"Tap + to add your first account")+'</div></div>';
+    return;
+  }
+  var html='<div class="lw">';
+  for (var j=0; j<filtered.length; j++) {
+    var a=filtered[j], av="av"+(chCode(a.service_name)%10), ini=(a.service_name||"?")[0].toUpperCase();
+    html+='<div class="ai" onclick="openDetail(\''+esc(a.id)+'\')"><div class="av '+av+'">'+ini+'</div><div class="ainfo"><div class="an">'+esc(a.service_name)+'</div><div class="am"><span class="au">'+esc(a.username)+'</span><span class="at">'+esc(a.type||"General")+'</span></div></div><div class="ach">&#8250;</div></div>';
+  }
+  el.innerHTML = html+'</div>';
+}
+
+// ── DETAIL ───────────────────────────────────────────────────
+function openDetail(id) {
+  var a=findById(id); if(!a) return;
+  var av="av"+(chCode(a.service_name)%10);
+  document.getElementById("dbody").innerHTML=
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'+
+      '<div class="av '+av+'" style="width:50px;height:50px;border-radius:13px;font-size:21px">'+(a.service_name[0]||"?").toUpperCase()+'</div>'+
+      '<div><div style="font-size:19px;font-weight:700">'+esc(a.service_name)+'</div>'+
+        '<div style="font-size:13px;color:var(--tx2);margin-top:2px">'+esc(a.type||"General")+(a.url?' &middot; <a href="'+esc(a.url)+'" target="_blank" style="color:var(--ac2);text-decoration:none">Visit</a>':"")+'</div>'+
+      '</div></div>'+
+    '<div class="field"><label>Username / Email</label><div style="display:flex;gap:8px;align-items:center"><div style="flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;font-size:14px">'+esc(a.username)+'</div><button class="btn btn-g btn-sm" onclick="cpText(\''+esc(a.username)+'\')">Copy</button></div></div>'+
+    '<div class="field"><label>Password</label><div class="pwd locked" id="pwbox"></div></div>'+
+    '<div class="field" id="nwrap" style="display:none"><label>Notes</label><div style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;font-size:13px;color:var(--tx2);white-space:pre-wrap;line-height:1.5" id="nbox"></div></div>'+
+    '<div class="brow"><button class="btn btn-p btn-sm" onclick="revealPw(\''+esc(id)+'\')">&#128274; Reveal</button><button class="btn btn-g btn-sm" id="cpbtn" style="display:none" onclick="cpPw()">Copy PW</button><button class="btn btn-g btn-sm" onclick="openEdit(\''+esc(id)+'\')">Edit</button><button class="btn btn-d btn-sm" onclick="confirmDel(\''+esc(id)+'\')">Delete</button></div>';
+  openDrawer();
+}
+
+function revealPw(id) {
+  apiGet({ action: "getCiphertext", id: id })
+    .then(function(d) {
+      if (!d) { toast("Record not found"); return; }
+      try {
+        var dec = CryptoJS.AES.decrypt(d.password_encrypted, MASTER).toString(CryptoJS.enc.Utf8);
+        if (!dec) { toast("Wrong Master Password"); return; }
+        var box = document.getElementById("pwbox"); if (!box) return;
+        box.textContent = dec; box.classList.remove("locked");
+        document.getElementById("cpbtn").style.display = "inline-flex";
+        if (d.notes_encrypted) {
+          var note = CryptoJS.AES.decrypt(d.notes_encrypted, MASTER).toString(CryptoJS.enc.Utf8);
+          if (note) { document.getElementById("nbox").textContent=note; document.getElementById("nwrap").style.display="block"; }
+        }
+      } catch(e) { toast("Decryption failed"); }
+    })
+    .catch(function(e){ toast("Error: "+e.message); });
+}
+function cpPw(){ var b=document.getElementById("pwbox"); if(b&&b.textContent&&!b.classList.contains("locked")) cpText(b.textContent); }
+
+// ── ADD / EDIT ────────────────────────────────────────────────
+function openEdit(id) {
+  var a=findById(id); if(!a) return;
+  closeDrawer(); EDIT_ID=id;
+  document.getElementById("add-lbl").textContent="Edit Account";
+  document.getElementById("f-service").value=a.service_name||"";
+  document.getElementById("f-user").value=a.username||"";
+  document.getElementById("f-pw").value="";
+  document.getElementById("f-pw").placeholder="Leave blank to keep current password";
+  document.getElementById("f-type").value=a.type||"General";
+  document.getElementById("f-url").value=a.url||"";
+  document.getElementById("f-notes").value="";
+  document.getElementById("save-btn").textContent="Save Changes";
+  showPanel("add");
+}
+
+function doSave() {
+  var service=document.getElementById("f-service").value.trim();
+  var user=document.getElementById("f-user").value.trim();
+  var pw=document.getElementById("f-pw").value;
+  var type=document.getElementById("f-type").value;
+  var url=document.getElementById("f-url").value.trim();
+  var notes=document.getElementById("f-notes").value.trim();
+  if (!service||!user){toast("Service name and username are required");return;}
+  if (!EDIT_ID&&!pw){toast("Password is required");return;}
+  var btn=document.getElementById("save-btn"); btn.disabled=true; btn.textContent="Saving...";
+
+  var finish=function(ok){ btn.disabled=false; resetForm(); if(ok){toast("Saved!");loadAccounts();showPanel("vault");}else toast("Save failed"); };
+
+  if (EDIT_ID) {
+    var p={id:EDIT_ID,service_name:service,username:user,type:type,url:url};
+    if(pw) p.password_encrypted=CryptoJS.AES.encrypt(pw,MASTER).toString();
+    if(notes) p.notes_encrypted=CryptoJS.AES.encrypt(notes,MASTER).toString();
+    apiPost({action:"updateAccount",payload:p}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error: "+e.message);btn.disabled=false;resetForm();});
+  } else {
+    var p2={service_name:service,username:user,type:type,url:url,
+      password_encrypted:CryptoJS.AES.encrypt(pw,MASTER).toString(),
+      notes_encrypted:notes?CryptoJS.AES.encrypt(notes,MASTER).toString():""};
+    apiPost({action:"saveAccount",payload:p2}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error: "+e.message);btn.disabled=false;resetForm();});
+  }
+}
+
+function resetForm(){
+  EDIT_ID=null;
+  document.getElementById("add-lbl").textContent="New Account";
+  ["f-service","f-user","f-pw","f-url","f-notes"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("f-pw").placeholder="Service password";
+  document.getElementById("f-type").value="General";
+  document.getElementById("save-btn").disabled=false;
+  document.getElementById("save-btn").textContent="Encrypt & Save";
+}
+
+// ── DELETE ────────────────────────────────────────────────────
+function confirmDel(id){
+  var a=findById(id);
+  document.getElementById("dbody").innerHTML=
+    '<div class="dt" style="color:var(--rd)">Delete Account?</div>'+
+    '<p style="color:var(--tx2);font-size:14px;margin-bottom:20px;line-height:1.6">Permanently delete <strong style="color:var(--tx)">'+esc(a?a.service_name:id)+'</strong>? Cannot be undone.</p>'+
+    '<div class="brow"><button class="btn btn-d" style="flex:1" onclick="doDel(\''+esc(id)+'\')">Delete permanently</button><button class="btn btn-g" style="flex:1" onclick="closeDrawer()">Cancel</button></div>';
+}
+function doDel(id){
+  apiPost({action:"deleteAccount",id:id}).then(function(r){
+    if(r&&r.success){toast("Deleted");closeDrawer();loadAccounts();}else toast("Delete failed");
+  }).catch(function(e){toast("Error: "+e.message);});
+}
+
+// ── IMPORT ────────────────────────────────────────────────────
+function dlTpl(){
+  var csv="service_name,username,password,type,url,notes\nGmail,user@gmail.com,mypass123,Work,https://gmail.com,backup: other@mail.com";
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="myvault_template.csv";a.click();
+}
+function onDragOver(e){e.preventDefault();document.getElementById("dropzone").classList.add("over");}
+function onDragLeave(){document.getElementById("dropzone").classList.remove("over");}
+function onDrop(e){e.preventDefault();document.getElementById("dropzone").classList.remove("over");var f=e.dataTransfer.files[0];if(f)procFile(f);}
+function onFileSel(e){if(e.target.files[0])procFile(e.target.files[0]);}
+function procFile(f){
+  if(!f.name.toLowerCase().endsWith(".csv")){toast("Please use a .csv file");return;}
+  var r=new FileReader();r.onload=function(e){parseCSV(e.target.result);};r.readAsText(f);
+}
+function parseCSV(text){
+  var lines=text.split("\n").filter(function(l){return l.trim();});
+  if(lines.length<2){toast("File is empty");return;}
+  var hdr=lines[0].toLowerCase().split(",").map(function(h){return h.trim().replace(/"/g,"");});
+  var iS=hdr.indexOf("service_name"),iU=hdr.indexOf("username"),iP=hdr.indexOf("password"),iT=hdr.indexOf("type"),iUr=hdr.indexOf("url"),iN=hdr.indexOf("notes");
+  if(iS<0||iU<0||iP<0){toast("Missing columns: service_name, username, password");return;}
+  IROWS=[];
+  for(var i=1;i<lines.length;i++){
+    var c=csvSplit(lines[i]),s=gc(c,iS),u=gc(c,iU),p=gc(c,iP);
+    if(!s||!u||!p)continue;
+    IROWS.push({service_name:s,username:u,raw_password:p,type:gc(c,iT)||"General",url:gc(c,iUr)||"",notes:gc(c,iN)||""});
+  }
+  if(!IROWS.length){toast("No valid rows found");return;}
+  var html='<div class="ipr hdr"><span class="ic1">Service</span><span class="ic2">Username</span><span class="ic3">Type</span></div>';
+  IROWS.slice(0,5).forEach(function(r){html+='<div class="ipr"><span class="ic1">'+esc(r.service_name)+'</span><span class="ic2">'+esc(r.username)+'</span><span class="ic3">'+esc(r.type)+'</span></div>';});
+  if(IROWS.length>5)html+='<div class="ipr" style="color:var(--tx3);font-size:12px">... and '+(IROWS.length-5)+' more</div>';
+  var prev=document.getElementById("iprev");prev.innerHTML=html;prev.style.display="block";
+  document.getElementById("iwarn").textContent=IROWS.length+" accounts will be encrypted and saved.";
+  document.getElementById("iact").style.display="block";
+}
+function gc(arr,idx){return idx>=0&&arr[idx]?arr[idx].trim().replace(/^"|"$/g,""):"";}
+function csvSplit(line){var res=[],cur="",inQ=false;for(var i=0;i<line.length;i++){var c=line[i];if(c==='"')inQ=!inQ;else if(c===','&&!inQ){res.push(cur);cur="";}else cur+=c;}res.push(cur);return res;}
+function doImport(){
+  if(!IROWS.length)return;
+  var btn=document.getElementById("ibtn");btn.disabled=true;btn.textContent="Encrypting...";
+  var enc=IROWS.map(function(r){return{service_name:r.service_name,username:r.username,type:r.type,url:r.url,
+    password_encrypted:CryptoJS.AES.encrypt(r.raw_password,MASTER).toString(),
+    notes_encrypted:r.notes?CryptoJS.AES.encrypt(r.notes,MASTER).toString():""};});
+  apiPost({action:"saveAccountsBatch",payload:enc})
+    .then(function(res){
+      btn.disabled=false;btn.textContent="Encrypt & Import";
+      if(res&&res.success){toast("Imported "+res.count+" accounts");clearImport();loadAccounts();showPanel("vault");}
+      else toast("Import failed");
+    }).catch(function(e){btn.disabled=false;btn.textContent="Encrypt & Import";toast("Error: "+e.message);});
+}
+function clearImport(){IROWS=[];document.getElementById("iprev").style.display="none";document.getElementById("iprev").innerHTML="";document.getElementById("iact").style.display="none";document.getElementById("fi").value="";}
+
+// ── BACKUP ────────────────────────────────────────────────────
+function doBackup(){
+  var blob=new Blob([JSON.stringify({vault:DATA,exported:new Date().toISOString(),note:"Ciphertext only - requires Master Password"},null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="myvault_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();
+  toast("Backup downloaded");
+}
+
+// ── CHANGE MASTER PW ──────────────────────────────────────────
+function showChangePw(){
+  document.getElementById("dbody").innerHTML=
+    '<div class="dt">Change Master Password</div>'+
+    '<div class="wbox">This will re-encrypt ALL passwords with the new Master Password.</div>'+
+    '<div class="field"><label>Current Password</label><div class="iw iwa"><input type="password" id="cp-old" autocomplete="off"><button class="ia" onclick="toggleEye(\'cp-old\',this)">&#128065;</button></div></div>'+
+    '<div class="field"><label>New Password</label><div class="iw iwa"><input type="password" id="cp-new" autocomplete="new-password"><button class="ia" onclick="toggleEye(\'cp-new\',this)">&#128065;</button></div></div>'+
+    '<div class="field"><label>Confirm New Password</label><input type="password" id="cp-conf" autocomplete="new-password"></div>'+
+    '<div class="brow"><button class="btn btn-p" style="flex:1" onclick="doChangePw()">Change Password</button><button class="btn btn-g btn-sm" onclick="closeDrawer()">Cancel</button></div>';
+  openDrawer();
+}
+function doChangePw(){
+  var oldPw=document.getElementById("cp-old").value,newPw=document.getElementById("cp-new").value,conf=document.getElementById("cp-conf").value;
+  if(oldPw!==MASTER){toast("Current password incorrect");return;}
+  if(!newPw||newPw.length<6){toast("New password must be at least 6 chars");return;}
+  if(newPw!==conf){toast("Passwords do not match");return;}
+  if(!DATA.length){MASTER=newPw;toast("Master password changed");closeDrawer();return;}
+  var btn=document.querySelector("#dbody .btn-p");btn.disabled=true;btn.textContent="Re-encrypting...";
+  var done=0, total=DATA.length;
+  DATA.forEach(function(row){
+    apiGet({action:"getCiphertext",id:row.id}).then(function(cipher){
+      if(!cipher){done++;if(done>=total){MASTER=newPw;toast("Done - "+done+" records re-encrypted");closeDrawer();}return;}
+      var decPw=CryptoJS.AES.decrypt(cipher.password_encrypted,oldPw).toString(CryptoJS.enc.Utf8);
+      var decN=cipher.notes_encrypted?CryptoJS.AES.decrypt(cipher.notes_encrypted,oldPw).toString(CryptoJS.enc.Utf8):"";
+      var pl={id:row.id,password_encrypted:CryptoJS.AES.encrypt(decPw,newPw).toString(),notes_encrypted:decN?CryptoJS.AES.encrypt(decN,newPw).toString():""};
+      apiPost({action:"updateAccount",payload:pl}).then(function(){done++;if(done>=total){MASTER=newPw;toast("Done - "+done+" records re-encrypted");closeDrawer();}});
+    });
+  });
+}
+
+// ── DRAWER ────────────────────────────────────────────────────
+function openDrawer(){document.getElementById("dov").classList.add("open");}
+function closeDrawer(){document.getElementById("dov").classList.remove("open");}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function cpText(t){
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast("Copied!");}).catch(function(){fallbackCopy(t);});}
+  else fallbackCopy(t);
+}
+function fallbackCopy(t){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");toast("Copied!");}catch(e){toast("Copy failed");}document.body.removeChild(ta);}
+function toggleEye(id,btn){var el=document.getElementById(id);if(el.type==="password"){el.type="text";btn.innerHTML="&#128584;";}else{el.type="password";btn.innerHTML="&#128065;";}}
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.className="show";setTimeout(function(){t.className="";},2600);}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function findById(id){for(var i=0;i<DATA.length;i++){if(DATA[i].id===id)return DATA[i];}return null;}
+function chCode(s){var n=0;s=s||"";for(var i=0;i<s.length;i++)n+=s.charCodeAt(i);return n;}
+</script>
+</body>
+</html>
