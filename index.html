@@ -19,19 +19,31 @@
 html,body{height:100%}
 body{font-family:var(--fn);font-size:15px;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-#lock-screen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px}
+/* ── LOCK SCREEN ── */
+#lock-screen{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px;padding-top:calc(32px + env(safe-area-inset-top))}
 .lglow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(124,106,247,.15) 0%,transparent 70%);pointer-events:none}
 .llogo{font-size:12px;font-weight:600;letter-spacing:3px;color:var(--tx3);text-transform:uppercase;margin-bottom:36px}
 .llogo span{color:var(--ac2)}
 .licon{width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,#7c6af7,#a598ff);display:flex;align-items:center;justify-content:center;margin-bottom:24px}
 .ltitle{font-size:26px;font-weight:600;margin-bottom:6px}
 .lsub{color:var(--tx2);font-size:14px;margin-bottom:32px;text-align:center;line-height:1.6}
+.lhint{display:none;align-items:center;gap:7px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);border-radius:10px;padding:8px 13px;margin-bottom:16px;font-size:13px;color:#6ee7b7}
+.lhint svg{width:15px;height:15px;stroke:#34d399;stroke-width:2;fill:none;flex-shrink:0}
+.lhint.show{display:flex}
 .lform{width:100%;max-width:320px}
 .lerr{color:var(--rd);font-size:13px;text-align:center;margin-top:10px;display:none}
 
-#app{display:none;max-width:680px;margin:0 auto;padding-bottom:70px;min-height:100vh}
+/* ── LANG SWITCHER ── */
+.lang-sw{position:absolute;top:18px;right:18px;display:flex;gap:3px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:3px}
+.lang-btn{padding:4px 10px;border-radius:16px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;color:var(--tx3);font-family:var(--fn);letter-spacing:.3px;transition:all .15s}
+.lang-btn.active{background:var(--ac);color:#fff}
+.tlang{display:flex;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:16px;padding:2px;flex-shrink:0}
+.tlb{padding:3px 8px;border-radius:12px;border:none;background:none;font-size:11px;font-weight:600;cursor:pointer;color:var(--tx3);font-family:var(--fn);transition:all .15s}
+.tlb.active{background:var(--ac);color:#fff}
 
-.topbar{position:sticky;top:0;z-index:20;background:rgba(10,10,15,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:12px 14px;display:flex;align-items:center;gap:10px}
+/* ── APP ── */
+#app{display:none;max-width:680px;margin:0 auto;padding-bottom:70px;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(10,10,15,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
 .tlogo{font-size:12px;font-weight:600;letter-spacing:2.5px;color:var(--tx3);text-transform:uppercase;flex-shrink:0}
 .tlogo span{color:var(--ac2)}
 .tsearch{flex:1;position:relative;display:none;align-items:center}
@@ -40,20 +52,17 @@ body{font-family:var(--fn);font-size:15px;background:var(--bg);color:var(--tx);-
 .tsearch input{width:100%;padding:8px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:14px;font-family:var(--fn);outline:none}
 .tsearch input:focus{border-color:var(--ac)}
 .tsearch input::placeholder{color:var(--tx3)}
-.tbtns{display:flex;gap:6px;flex-shrink:0}
+.tbtns{display:flex;gap:6px;flex-shrink:0;align-items:center}
 .ib{width:34px;height:34px;border-radius:var(--rs);background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .ib svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .ib:hover{border-color:var(--bd2);color:var(--tx)}
-
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;background:rgba(13,13,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd);display:flex;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
 .nb{flex:1;padding:9px 4px 7px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tx3)}
 .nb svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .nb span{font-size:10px;font-weight:500;font-family:var(--fn)}
 .nb.active{color:var(--ac2)}
-
 .panel{display:none;padding:14px 14px 0}
 .panel.active{display:block}
-
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--fn);transition:opacity .15s}
 .btn:active{opacity:.75}
 .btn-p{background:var(--ac);color:#fff}
@@ -62,7 +71,6 @@ body{font-family:var(--fn);font-size:15px;background:var(--bg);color:var(--tx);-
 .btn-sm{padding:7px 13px;font-size:13px}
 .btn-full{width:100%}
 .brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-
 .field{margin-bottom:14px}
 .field label{display:block;font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--tx3);margin-bottom:5px}
 .iw{position:relative}
@@ -74,19 +82,15 @@ input::placeholder,textarea::placeholder{color:var(--tx3)}
 textarea{resize:vertical;min-height:76px;line-height:1.5}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2355556a' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
 select option{background:#1c1c27}
-
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rr);padding:16px;margin-bottom:12px}
-
 .stats{display:flex;gap:10px;margin-bottom:16px}
 .sc{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rr);padding:13px 10px;text-align:center}
 .sn{font-size:22px;font-weight:600;color:var(--ac2);line-height:1;margin-bottom:3px}
 .sl{font-size:10px;color:var(--tx3);letter-spacing:.4px;text-transform:uppercase}
-
 .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--fn)}
 .chip.active{background:var(--ac);border-color:var(--ac);color:#fff}
-
 .lw{border-radius:var(--rr);overflow:hidden;border:1px solid var(--bd);width:100%}
 .tbl{width:100%;border-collapse:collapse}
 .tbl thead tr{background:var(--sf3)}
@@ -108,18 +112,15 @@ select option{background:#1c1c27}
 .ei{font-size:36px;margin-bottom:10px}
 .et{font-size:16px;font-weight:600;margin-bottom:5px}
 .es{font-size:13px;color:var(--tx2)}
-
 #dov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
 #dov.open{display:flex}
 #drawer{background:var(--sf);border-radius:20px 20px 0 0;border:1px solid var(--bd2);border-bottom:none;padding:8px 18px 40px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;animation:su .22s cubic-bezier(.16,1,.3,1)}
 @keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .dh{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:8px auto 18px}
 .dt{font-size:19px;font-weight:600;margin-bottom:18px}
-
 .pwd{font-family:var(--mo);font-size:16px;letter-spacing:1px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 13px;word-break:break-all;line-height:1.5;min-height:46px;color:var(--ac2)}
 .pwd.locked{color:var(--tx3);letter-spacing:3px;font-size:13px}
 .pwd.locked::before{content:"- - - - - - - - - -"}
-
 .dz{border:2px dashed var(--bd2);border-radius:var(--rr);padding:28px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--sf)}
 .dz:hover,.dz.over{border-color:var(--ac);background:rgba(124,106,247,.06)}
 .dzi{font-size:28px;margin-bottom:8px}
@@ -130,7 +131,6 @@ select option{background:#1c1c27}
 .ipr:last-child{border-bottom:none}
 .ipr.hdr{color:var(--tx3);font-weight:600;background:var(--sf3);font-size:11px;letter-spacing:.4px;text-transform:uppercase}
 .ic1{width:110px;flex-shrink:0;font-weight:500}.ic2{flex:1;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ic3{width:75px;flex-shrink:0;color:var(--tx3)}
-
 .sg{margin-bottom:14px}
 .sgl{font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--tx3);padding:0 3px;margin-bottom:6px}
 .sgw{border-radius:var(--rr);overflow:hidden;border:1px solid var(--bd)}
@@ -143,146 +143,191 @@ select option{background:#1c1c27}
 .stit{font-size:15px;font-weight:500}
 .shit{font-size:12px;color:var(--tx3);margin-top:1px}
 .sir{color:var(--tx3)}
-
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--sf3);border:1px solid var(--bd2);color:var(--tx);padding:9px 18px;border-radius:20px;font-size:14px;z-index:999;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;max-width:86vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
 .slbl{font-size:11px;font-weight:600;letter-spacing:.7px;color:var(--tx3);text-transform:uppercase;padding:3px 2px 10px}
 .ibox{background:rgba(124,106,247,.08);border:1px solid rgba(124,106,247,.2);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:13px}
 .wbox{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:#fde68a;line-height:1.6;margin-bottom:13px}
-
+/* Upgrade banner (reuses wbox style, adds flex layout) */
+.upgrade-banner{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:#fde68a;line-height:1.6;margin-bottom:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.upgrade-banner span{flex:1;min-width:180px}
 .av0{background:linear-gradient(135deg,#7c6af7,#a598ff)}.av1{background:linear-gradient(135deg,#06b6d4,#67e8f9)}.av2{background:linear-gradient(135deg,#10b981,#6ee7b7)}.av3{background:linear-gradient(135deg,#f59e0b,#fcd34d)}.av4{background:linear-gradient(135deg,#ef4444,#fca5a5)}.av5{background:linear-gradient(135deg,#8b5cf6,#c4b5fd)}.av6{background:linear-gradient(135deg,#ec4899,#f9a8d4)}.av7{background:linear-gradient(135deg,#3b82f6,#93c5fd)}.av8{background:linear-gradient(135deg,#14b8a6,#5eead4)}.av9{background:linear-gradient(135deg,#f97316,#fdba74)}
 </style>
 </head>
 <body>
 
+<!-- ════════════════════════════════════════════════════
+     LOCK SCREEN
+════════════════════════════════════════════════════ -->
 <div id="lock-screen">
   <div class="lglow"></div>
+  <div class="lang-sw">
+    <button class="lang-btn active" id="lock-lang-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn"        id="lock-lang-vi" onclick="setLang('vi')">VI</button>
+  </div>
   <div class="llogo">My<span>Vault</span></div>
   <div class="licon">
-    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
       <rect x="9" y="21" width="26" height="20" rx="4" fill="#fbbf24"/>
       <path d="M14 21 v-6 a8 8 0 0 1 16 0 v6" stroke="#f0f0f8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <circle cx="22" cy="29" r="2.5" fill="#92400e"/>
       <rect x="20.5" y="29" width="3" height="5" rx="1.5" fill="#92400e"/>
     </svg>
   </div>
-  <div class="ltitle">Welcome back</div>
-  <div class="lsub">Enter your Master Password to<br>decrypt and access your vault.</div>
-  <div class="lform">
+  <div class="ltitle" data-i18n="lockTitle">Welcome back</div>
+  <div class="lsub"   data-i18n="lockSub">Enter your Master Password to<br>decrypt and access your vault.</div>
+  <div class="lhint" id="lhint">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span data-i18n="lockHint">Tap the key icon in your browser to use Face ID / Touch ID</span>
+  </div>
+  <!--
+    FORM CHUẨN → trình duyệt nhận diện và gợi ý lưu password
+    autocomplete="current-password" kích hoạt autofill + vân tay trên iOS/Android/Desktop
+  -->
+  <form id="unlock-form" action="#" onsubmit="event.preventDefault();doUnlock();" class="lform" autocomplete="on">
+    <input type="text" name="username" value="myvault_admin" autocomplete="username"
+           style="display:none" aria-hidden="true" tabindex="-1">
     <div class="field iw iwa">
-      <input type="password" id="master-input" placeholder="Master Password" autocomplete="off" onkeydown="if(event.key==='Enter')doUnlock()">
+      <input type="password" id="master-input" name="password"
+             autocomplete="current-password" required
+             data-i18n-placeholder="masterPwPlaceholder">
       <button class="ia" onclick="toggleEye('master-input',this)" type="button">&#128065;</button>
     </div>
-    <button class="btn btn-p btn-full" onclick="doUnlock()">Unlock Vault</button>
-    <div id="lerr" class="lerr">Incorrect password or data error</div>
-  </div>
+    <button type="submit" class="btn btn-p btn-full" id="unlock-btn" data-i18n="unlockBtn">&#128274; Unlock Vault</button>
+    <div id="lerr" class="lerr" data-i18n="unlockErr">Incorrect password or data error</div>
+  </form>
 </div>
 
+<!-- ════════════════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════════════ -->
 <div id="app">
   <div class="topbar">
     <div class="tlogo">My<span>Vault</span></div>
     <div class="tsearch" id="srchwrap">
-      <input type="text" id="srch" placeholder="Search services, usernames, types..." oninput="onSearch()">
+      <input type="text" id="srch" oninput="onSearch()" data-i18n-placeholder="searchPlaceholder">
     </div>
     <div class="tbtns">
-      <button class="ib" id="srch-btn" onclick="toggleSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
-      <button class="ib" onclick="loadAccounts()" title="Refresh"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
-      <button class="ib" onclick="doLock()" title="Lock"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button>
+      <div class="tlang">
+        <button class="tlb active" id="app-lang-en" onclick="setLang('en')">EN</button>
+        <button class="tlb"        id="app-lang-vi" onclick="setLang('vi')">VI</button>
+      </div>
+      <button class="ib" id="srch-btn" onclick="toggleSearch()" data-i18n-title="searchTitle">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      </button>
+      <button class="ib" onclick="loadAccounts()" data-i18n-title="refreshTitle">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="ib" onclick="doLock()" data-i18n-title="lockTitle2">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
     </div>
   </div>
 
+  <!-- VAULT PANEL -->
   <div class="panel active" id="panel-vault">
     <div style="padding:4px 0 2px"><div class="chips" id="chips"></div></div>
-    <div id="acc-list"><div class="empty"><div class="ei">&#128274;</div><div class="et">Loading vault...</div></div></div>
+    <div id="acc-list">
+      <div class="empty"><div class="ei">&#128274;</div><div class="et" data-i18n="loading">Loading vault...</div></div>
+    </div>
   </div>
 
+  <!-- ADD PANEL -->
   <div class="panel" id="panel-add">
-    <div class="slbl" id="add-lbl">New Account</div>
+    <div class="slbl" id="add-lbl" data-i18n="newAccount">New Account</div>
     <div class="card" style="padding:18px">
-      <div class="wbox">&#128274; Encryption happens on this device. Server only receives encrypted data.</div>
-      <div class="field"><label>Service Name *</label><input type="text" id="f-service" placeholder="Gmail, Facebook, Netflix..."></div>
-      <div class="field"><label>Username / Email *</label><input type="text" id="f-user" placeholder="your@email.com" autocomplete="off"></div>
-      <div class="field"><label>Password *</label><div class="iw iwa"><input type="password" id="f-pw" placeholder="Service password" autocomplete="new-password"><button class="ia" onclick="toggleEye('f-pw',this)" type="button">&#128065;</button></div></div>
-      <div class="field"><label>Category</label>
-        <input type="text" id="f-type" placeholder="Tech, Finance, Social, Work..." autocomplete="off">
+      <div class="wbox" data-i18n="encryptNote">&#128274; Encryption happens on this device. Server only receives encrypted data.</div>
+      <div class="field"><label data-i18n="fService">Service Name *</label><input type="text" id="f-service" data-i18n-placeholder="fServicePh" autocomplete="off"></div>
+      <div class="field"><label data-i18n="fUser">Username / Email *</label><input type="text" id="f-user" data-i18n-placeholder="fUserPh" autocomplete="off"></div>
+      <div class="field"><label data-i18n="fPw">Password *</label>
+        <div class="iw iwa"><input type="password" id="f-pw" data-i18n-placeholder="fPwPh" autocomplete="new-password">
+        <button class="ia" onclick="toggleEye('f-pw',this)" type="button">&#128065;</button></div>
       </div>
-      <div class="field"><label>URL (optional)</label><input type="text" id="f-url" placeholder="https://..."></div>
-      <div class="field"><label>Notes (optional)</label><textarea id="f-notes" placeholder="Security questions, PINs..."></textarea></div>
+      <div class="field"><label data-i18n="fCat">Category</label><input type="text" id="f-type" data-i18n-placeholder="fCatPh" autocomplete="off"></div>
+      <div class="field"><label data-i18n="fUrl">URL (optional)</label><input type="text" id="f-url" placeholder="https://..."></div>
+      <div class="field"><label data-i18n="fNotes">Notes (optional)</label><textarea id="f-notes" data-i18n-placeholder="fNotesPh"></textarea></div>
       <div class="brow">
-        <button class="btn btn-p" style="flex:1" id="save-btn" onclick="doSave()">&#128274; Encrypt &amp; Save</button>
-        <button class="btn btn-g btn-sm" onclick="resetForm();showPanel('vault')">Cancel</button>
+        <button class="btn btn-p" style="flex:1" id="save-btn" onclick="doSave()" data-i18n="saveBtn">&#128274; Encrypt &amp; Save</button>
+        <button class="btn btn-g btn-sm" onclick="resetForm();showPanel('vault')" data-i18n="cancelBtn">Cancel</button>
       </div>
     </div>
   </div>
 
+  <!-- IMPORT PANEL -->
   <div class="panel" id="panel-import">
-    <div class="slbl">Import Accounts</div>
-    <div class="ibox">Upload a <strong>CSV</strong> file. Passwords are encrypted on your device before upload.</div>
+    <div class="slbl" data-i18n="importTitle">Import Accounts</div>
+    <div class="ibox" data-i18n="importNote">Upload a <strong>CSV</strong> file. Passwords are encrypted on your device before upload.</div>
     <div class="card" style="padding:14px;margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px">Template Columns</span>
-        <button class="btn btn-g btn-sm" onclick="dlTpl()">&#11015; Download CSV</button>
+        <span style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px" data-i18n="tplCols">Template Columns</span>
+        <button class="btn btn-g btn-sm" onclick="dlTpl()" data-i18n="dlTpl">&#11015; Download CSV</button>
       </div>
       <div style="font-size:13px;color:var(--tx2);font-family:var(--mo);background:var(--sf2);padding:9px 11px;border-radius:7px;line-height:1.8">service_name, username, password, type, url, notes</div>
     </div>
     <div class="dz" id="dropzone" onclick="document.getElementById('fi').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
       <div class="dzi">&#128196;</div>
-      <div class="dzt">Drop CSV here or click to browse</div>
-      <div class="dzs">Excel: File > Save As > CSV first</div>
+      <div class="dzt" data-i18n="dropTitle">Drop CSV here or click to browse</div>
+      <div class="dzs" data-i18n="dropSub">Excel: File &gt; Save As &gt; CSV first</div>
       <input type="file" id="fi" accept=".csv" style="display:none" onchange="onFileSel(event)">
     </div>
     <div id="iprev"></div>
     <div id="iact" style="display:none;margin-top:12px">
       <div class="wbox" id="iwarn"></div>
       <div class="brow">
-        <button class="btn btn-p" style="flex:1" id="ibtn" onclick="doImport()">&#128274; Encrypt &amp; Import</button>
-        <button class="btn btn-g btn-sm" onclick="clearImport()">Clear</button>
+        <button class="btn btn-p" style="flex:1" id="ibtn" onclick="doImport()" data-i18n="importBtn">&#128274; Encrypt &amp; Import</button>
+        <button class="btn btn-g btn-sm" onclick="clearImport()" data-i18n="clearBtn">Clear</button>
       </div>
     </div>
   </div>
 
+  <!-- SETTINGS PANEL -->
   <div class="panel" id="panel-settings">
     <div class="stats" style="margin-bottom:18px">
-      <div class="sc"><div class="sn" id="stat-n">0</div><div class="sl">Accounts</div></div>
-      <div class="sc"><div class="sn" style="font-size:16px;padding-top:3px">AES-256</div><div class="sl">Encryption</div></div>
-      <div class="sc"><div class="sn" style="font-size:14px;padding-top:5px;color:var(--gn)">E2E</div><div class="sl">Zero-Knowledge</div></div>
+      <div class="sc"><div class="sn" id="stat-n">0</div><div class="sl" data-i18n="statAccounts">Accounts</div></div>
+      <div class="sc"><div class="sn" style="font-size:13px;padding-top:6px" id="stat-enc">PBKDF2</div><div class="sl" data-i18n="statEnc">Encryption</div></div>
+      <div class="sc"><div class="sn" style="font-size:14px;padding-top:5px;color:var(--gn)">E2E</div><div class="sl" data-i18n="statZk">Zero-Knowledge</div></div>
     </div>
     <div class="sg">
-      <div class="sgl">Data</div>
+      <div class="sgl" data-i18n="sgData">Data</div>
       <div class="sgw">
         <div class="si" onclick="doBackup()">
           <div class="sil"><div class="sico" style="background:rgba(52,211,153,.12)"><svg stroke="#34d399" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-            <div><div class="stit">Export Backup</div><div class="shit">Download encrypted JSON backup</div></div></div>
+            <div><div class="stit" data-i18n="exportTitle">Export Backup</div><div class="shit" data-i18n="exportSub">Download encrypted JSON backup</div></div></div>
           <div class="sir">&#8250;</div>
         </div>
         <div class="si" onclick="showPanel('import')">
           <div class="sil"><div class="sico" style="background:rgba(124,106,247,.12)"><svg stroke="#a598ff" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-            <div><div class="stit">Import Accounts</div><div class="shit">From CSV file</div></div></div>
+            <div><div class="stit" data-i18n="importTitle2">Import Accounts</div><div class="shit" data-i18n="importSub">From CSV file</div></div></div>
           <div class="sir">&#8250;</div>
         </div>
       </div>
     </div>
     <div class="sg">
-      <div class="sgl">Security</div>
+      <div class="sgl" data-i18n="sgSec">Security</div>
       <div class="sgw">
+        <!-- Encryption status row -->
+        <div class="si" onclick="doUpgradeEncryption()">
+          <div class="sil"><div class="sico" style="background:rgba(52,211,153,.12)"><svg stroke="#34d399" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="stit" data-i18n="encStatusTitle">Encryption Upgrade</div><div class="shit" id="enc-status-hint" data-i18n="encStatusSub">Checking...</div></div></div>
+          <div class="sir" id="enc-status-icon">&#8250;</div>
+        </div>
         <div class="si" onclick="showChangePw()">
           <div class="sil"><div class="sico" style="background:rgba(251,191,36,.12)"><svg stroke="#fbbf24" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-            <div><div class="stit">Change Master Password</div><div class="shit">Re-encrypts all data</div></div></div>
+            <div><div class="stit" data-i18n="changePwTitle">Change Master Password</div><div class="shit" data-i18n="changePwSub">Re-encrypts all data</div></div></div>
           <div class="sir">&#8250;</div>
         </div>
         <div class="si" onclick="doLock()">
           <div class="sil"><div class="sico" style="background:rgba(248,113,113,.12)"><svg stroke="#f87171" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-            <div><div class="stit">Lock Vault</div><div class="shit">Clears memory, back to lock screen</div></div></div>
+            <div><div class="stit" data-i18n="lockVaultTitle">Lock Vault</div><div class="shit" data-i18n="lockVaultSub">Clears memory, back to lock screen</div></div></div>
           <div class="sir">&#8250;</div>
         </div>
       </div>
     </div>
     <div class="sg">
-      <div class="sgl">Install as App</div>
-      <div class="ibox" style="margin-bottom:0">
-        <strong>iPhone/iPad:</strong> Safari &rarr; Share button &rarr; "Add to Home Screen"<br>
-        <strong>Android:</strong> Chrome menu (&vellip;) &rarr; "Add to Home Screen"<br>
+      <div class="sgl" data-i18n="sgInstall">Install as App</div>
+      <div class="ibox" style="margin-bottom:0" data-i18n="installNote">
+        <strong>iPhone/iPad:</strong> Safari &rarr; Share &rarr; "Add to Home Screen"<br>
+        <strong>Android:</strong> Chrome (&vellip;) &rarr; "Add to Home Screen"<br>
         <strong>Desktop:</strong> Chrome address bar &rarr; install icon (&#8853;)
       </div>
     </div>
@@ -291,19 +336,19 @@ select option{background:#1c1c27}
   <nav class="bnav">
     <button class="nb active" id="nav-vault" onclick="showPanel('vault')">
       <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      <span>Vault</span>
+      <span data-i18n="navVault">Vault</span>
     </button>
     <button class="nb" id="nav-add" onclick="showPanel('add')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-      <span>Add</span>
+      <span data-i18n="navAdd">Add</span>
     </button>
     <button class="nb" id="nav-import" onclick="showPanel('import')">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <span>Import</span>
+      <span data-i18n="navImport">Import</span>
     </button>
     <button class="nb" id="nav-settings" onclick="showPanel('settings')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Settings</span>
+      <span data-i18n="navSettings">Settings</span>
     </button>
   </nav>
 </div>
@@ -314,57 +359,494 @@ select option{background:#1c1c27}
 <div id="toast"></div>
 
 <script>
-// ── CONFIG ── Replace with your GAS Web App URL ──────────────
-var GAS_URL = "https://script.google.com/macros/s/AKfycby8f_Y2bBuUJdLNVjs9dd-U1mYyihdv3-LkIiX4Ihr5a-lJawvB3e1QL0rniXjqTFo/exec";
-// ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// IIFE — tất cả biến private, không lộ ra window
+// ════════════════════════════════════════════════════════════════
+(function() {
+'use strict';
 
-var MASTER="", DATA=[], FILTER="All", SEARCH="", EDIT_ID=null, IROWS=[], SRCH=false;
-var LOCK_TIMER=null;
-var LOCK_DELAY=5*60*1000;
-function resetLockTimer(){
+// ══════════════════════════════════════════════════════════
+// CONFIG — thay URL GAS của bạn vào đây
+// ══════════════════════════════════════════════════════════
+var GAS_URL = "https://script.google.com/macros/s/AKfycby8f_Y2bBuUJdLNVjs9dd-U1mYyihdv3-LkIiX4Ihr5a-lJawvB3e1QL0rniXjqTFo/exec";
+
+// ══════════════════════════════════════════════════════════
+// STATE — tất cả private, MASTER không truy cập được từ console
+// ══════════════════════════════════════════════════════════
+var MASTER_RAW   = '';    // raw password, chỉ dùng để giải mã dữ liệu cũ
+var DERIVED_KEY  = null;  // CryptoKey từ PBKDF2, dùng cho dữ liệu mới
+var AUTH_TOKEN   = '';    // SHA-256(MASTER) — gửi kèm API để GAS xác thực
+var DATA = [], LANG = localStorage.getItem("mv_lang") || "en";
+var FILTER = "", SEARCH = "", EDIT_ID = null, IROWS = [], SRCH = false;
+var LOCK_TIMER = null, LOCK_DELAY = 5 * 60 * 1000;
+
+// ── Crypto constants ──
+// FIXED_SALT: cố định để đồng bộ đa thiết bị.
+// Đổi chuỗi này thành chuỗi bí mật riêng của bạn (giữ kín, không chia sẻ).
+var FIXED_SALT   = 'myvault_personal_salt_2026_unique';
+var UPGRADED_KEY = 'mv_enc_v2';     // flag: đã nâng cấp lên v2 chưa
+var KDF_ITER     = 100000;          // số vòng PBKDF2 (Web Crypto native → rất nhanh)
+
+// ══════════════════════════════════════════════════════════
+// I18N
+// ══════════════════════════════════════════════════════════
+var STRINGS = {
+  en: {
+    lockTitle:          "Welcome back",
+    lockSub:            "Enter your Master Password to<br>decrypt and access your vault.",
+    lockHint:           "Tap the key icon in your browser to use Face ID / Touch ID",
+    masterPwPlaceholder:"Master Password",
+    unlockBtn:          "&#128274; Unlock Vault",
+    unlocking:          "&#9203; Securing key...",
+    unlockErr:          "Incorrect password or data error",
+    searchPlaceholder:  "Search services, usernames, types...",
+    searchTitle:        "Search",
+    refreshTitle:       "Refresh",
+    lockTitle2:         "Lock",
+    loading:            "Loading vault...",
+    newAccount:         "New Account",
+    encryptNote:        "&#128274; Encryption happens on this device. Server only receives encrypted data.",
+    fService:           "Service Name *",
+    fServicePh:         "Gmail, Facebook, Netflix...",
+    fUser:              "Username / Email *",
+    fUserPh:            "your@email.com",
+    fPw:                "Password *",
+    fPwPh:              "Service password",
+    fCat:               "Category",
+    fCatPh:             "Tech, Finance, Social, Work...",
+    fUrl:               "URL (optional)",
+    fNotes:             "Notes (optional)",
+    fNotesPh:           "Security questions, PINs...",
+    saveBtn:            "&#128274; Encrypt & Save",
+    cancelBtn:          "Cancel",
+    editBtn:            "Save Changes",
+    importTitle:        "Import Accounts",
+    importTitle2:       "Import Accounts",
+    importNote:         "Upload a <strong>CSV</strong> file. Passwords are encrypted on your device before upload.",
+    tplCols:            "Template Columns",
+    dlTpl:              "&#11015; Download CSV",
+    dropTitle:          "Drop CSV here or click to browse",
+    dropSub:            "Excel: File > Save As > CSV first",
+    importBtn:          "&#128274; Encrypt & Import",
+    clearBtn:           "Clear",
+    statAccounts:       "Accounts",
+    statEnc:            "Encryption",
+    statZk:             "Zero-Knowledge",
+    sgData:             "Data",
+    exportTitle:        "Export Backup",
+    exportSub:          "Download encrypted JSON backup",
+    importSub:          "From CSV file",
+    sgSec:              "Security",
+    encStatusTitle:     "Encryption Upgrade",
+    encStatusSub:       "Checking...",
+    encStatusV2:        "All data on PBKDF2+AES-GCM ✓",
+    encStatusOld:       "Old data found — tap to upgrade",
+    encStatusUpgrading: "Upgrading {n} records...",
+    upgradeBtn:         "Upgrade",
+    upgradeDone:        "&#10003; All records upgraded to PBKDF2!",
+    changePwTitle:      "Change Master Password",
+    changePwSub:        "Re-encrypts all data",
+    lockVaultTitle:     "Lock Vault",
+    lockVaultSub:       "Clears memory, back to lock screen",
+    sgInstall:          "Install as App",
+    installNote:        "<strong>iPhone/iPad:</strong> Safari &rarr; Share &rarr; \"Add to Home Screen\"<br><strong>Android:</strong> Chrome (&vellip;) &rarr; \"Add to Home Screen\"<br><strong>Desktop:</strong> Chrome address bar &rarr; install icon (&#8853;)",
+    navVault:           "Vault",
+    navAdd:             "Add",
+    navImport:          "Import",
+    navSettings:        "Settings",
+    all:                "All",
+    general:            "General",
+    vaultEmpty:         "Vault is empty",
+    vaultEmptySub:      "Tap + to add your first account",
+    noResults:          "No results",
+    noResultsSub:       "Try different search",
+    loadFailed:         "Load failed",
+    colService:         "Service",
+    colUser:            "Username",
+    colCat:             "Category",
+    copied:             "Copied!",
+    copyFailed:         "Copy failed",
+    saved:              "Saved!",
+    saveFailed:         "Save failed",
+    saving:             "Saving...",
+    deleted:            "Deleted",
+    deleteFailed:       "Delete failed",
+    imported:           "Imported",
+    importFailed:       "Import failed",
+    encrypting:         "Encrypting...",
+    backupDownloaded:   "Backup downloaded",
+    autoLocked:         "Auto-locked after 5 minutes",
+    wrongPw:            "Wrong Master Password",
+    decryptFailed:      "Decryption failed",
+    recordNotFound:     "Record not found",
+    reqFields:          "Service name and username are required",
+    pwRequired:         "Password is required",
+    csvOnly:            "Please use a .csv file",
+    csvEmpty:           "File is empty",
+    csvMissingCols:     "Missing columns: service_name, username, password",
+    csvNoRows:          "No valid rows found",
+    currentPwWrong:     "Current password incorrect",
+    newPwShort:         "New password must be at least 6 chars",
+    pwMismatch:         "Passwords do not match",
+    reEncrypting:       "Re-encrypting {n}/{total}...",
+    doneReEncrypt:      "Done - {n} records re-encrypted",
+    delConfirmTitle:    "Delete Account?",
+    delConfirmMsg:      "Permanently delete <strong style=\"color:var(--tx)\">{name}</strong>? Cannot be undone.",
+    delBtn:             "Delete permanently",
+    editAccount:        "Edit Account",
+    keepPwPh:           "Leave blank to keep current password",
+    revealBtn:          "&#128274; Reveal",
+    copyPwBtn:          "Copy PW",
+    editItemBtn:        "Edit",
+    deleteItemBtn:      "Delete",
+    visitLink:          "Visit",
+    changePwDrawerTitle:"Change Master Password",
+    changePwWarning:    "This will re-encrypt ALL passwords with the new Master Password.",
+    currentPwLabel:     "Current Password",
+    newPwLabel:         "New Password",
+    confirmPwLabel:     "Confirm New Password",
+    changePwBtn:        "Change Password",
+    iprService:         "Service",
+    iprUsername:        "Username",
+    iprType:            "Type",
+    andMore:            "... and {n} more",
+    willImport:         "{n} accounts will be encrypted and saved.",
+  },
+  vi: {
+    lockTitle:          "Chào mừng trở lại",
+    lockSub:            "Nhập Mật khẩu Master để<br>giải mã và truy cập kho của bạn.",
+    lockHint:           "Nhấn vào biểu tượng chìa khóa trên trình duyệt để dùng Face ID / Touch ID",
+    masterPwPlaceholder:"Mật khẩu Master",
+    unlockBtn:          "&#128274; Mở khóa Kho",
+    unlocking:          "&#9203; Đang tạo khóa bảo mật...",
+    unlockErr:          "Sai mật khẩu hoặc lỗi dữ liệu",
+    searchPlaceholder:  "Tìm dịch vụ, tài khoản, phân loại...",
+    searchTitle:        "Tìm kiếm",
+    refreshTitle:       "Làm mới",
+    lockTitle2:         "Khóa",
+    loading:            "Đang tải kho...",
+    newAccount:         "Tài khoản mới",
+    encryptNote:        "&#128274; Mã hóa ngay trên thiết bị của bạn. Server chỉ nhận dữ liệu đã mã hóa.",
+    fService:           "Tên dịch vụ *",
+    fServicePh:         "Gmail, Facebook, Netflix...",
+    fUser:              "Tài khoản / Email *",
+    fUserPh:            "email@cua-ban.com",
+    fPw:                "Mật khẩu *",
+    fPwPh:              "Mật khẩu dịch vụ",
+    fCat:               "Phân loại",
+    fCatPh:             "Công nghệ, Tài chính, Mạng xã hội...",
+    fUrl:               "URL (tùy chọn)",
+    fNotes:             "Ghi chú (tùy chọn)",
+    fNotesPh:           "Câu hỏi bảo mật, mã PIN...",
+    saveBtn:            "&#128274; Mã hóa & Lưu",
+    cancelBtn:          "Hủy",
+    editBtn:            "Lưu thay đổi",
+    importTitle:        "Nhập tài khoản",
+    importTitle2:       "Nhập tài khoản",
+    importNote:         "Tải lên file <strong>CSV</strong>. Mật khẩu được mã hóa trên thiết bị trước khi gửi lên.",
+    tplCols:            "Cột mẫu CSV",
+    dlTpl:              "&#11015; Tải CSV mẫu",
+    dropTitle:          "Kéo thả CSV vào đây hoặc nhấn để chọn file",
+    dropSub:            "Excel: File &gt; Save As &gt; CSV trước",
+    importBtn:          "&#128274; Mã hóa & Nhập",
+    clearBtn:           "Xóa",
+    statAccounts:       "Tài khoản",
+    statEnc:            "Mã hóa",
+    statZk:             "Zero-Knowledge",
+    sgData:             "Dữ liệu",
+    exportTitle:        "Xuất bản sao lưu",
+    exportSub:          "Tải xuống backup JSON đã mã hóa",
+    importSub:          "Từ file CSV",
+    sgSec:              "Bảo mật",
+    encStatusTitle:     "Nâng cấp mã hóa",
+    encStatusSub:       "Đang kiểm tra...",
+    encStatusV2:        "Tất cả dữ liệu dùng PBKDF2+AES-GCM ✓",
+    encStatusOld:       "Tìm thấy dữ liệu cũ — nhấn để nâng cấp",
+    encStatusUpgrading: "Đang nâng cấp {n} bản ghi...",
+    upgradeBtn:         "Nâng cấp",
+    upgradeDone:        "&#10003; Đã nâng cấp toàn bộ lên PBKDF2!",
+    changePwTitle:      "Đổi Mật khẩu Master",
+    changePwSub:        "Mã hóa lại toàn bộ dữ liệu",
+    lockVaultTitle:     "Khóa Kho",
+    lockVaultSub:       "Xóa bộ nhớ, quay về màn hình khóa",
+    sgInstall:          "Cài đặt như ứng dụng",
+    installNote:        "<strong>iPhone/iPad:</strong> Safari &rarr; Chia sẻ &rarr; \"Thêm vào Màn hình chính\"<br><strong>Android:</strong> Chrome (&vellip;) &rarr; \"Thêm vào Màn hình chính\"<br><strong>Desktop:</strong> Thanh địa chỉ Chrome &rarr; biểu tượng cài đặt (&#8853;)",
+    navVault:           "Kho",
+    navAdd:             "Thêm",
+    navImport:          "Nhập",
+    navSettings:        "Cài đặt",
+    all:                "Tất cả",
+    general:            "Chung",
+    vaultEmpty:         "Kho trống",
+    vaultEmptySub:      "Nhấn + để thêm tài khoản đầu tiên",
+    noResults:          "Không có kết quả",
+    noResultsSub:       "Thử từ khóa khác",
+    loadFailed:         "Tải thất bại",
+    colService:         "Dịch vụ",
+    colUser:            "Tài khoản",
+    colCat:             "Phân loại",
+    copied:             "Đã sao chép!",
+    copyFailed:         "Sao chép thất bại",
+    saved:              "Đã lưu!",
+    saveFailed:         "Lưu thất bại",
+    saving:             "Đang lưu...",
+    deleted:            "Đã xóa",
+    deleteFailed:       "Xóa thất bại",
+    imported:           "Đã nhập",
+    importFailed:       "Nhập thất bại",
+    encrypting:         "Đang mã hóa...",
+    backupDownloaded:   "Đã tải bản sao lưu",
+    autoLocked:         "Tự khóa sau 5 phút không hoạt động",
+    wrongPw:            "Sai Mật khẩu Master",
+    decryptFailed:      "Giải mã thất bại",
+    recordNotFound:     "Không tìm thấy bản ghi",
+    reqFields:          "Tên dịch vụ và tài khoản là bắt buộc",
+    pwRequired:         "Mật khẩu là bắt buộc",
+    csvOnly:            "Vui lòng dùng file .csv",
+    csvEmpty:           "File trống",
+    csvMissingCols:     "Thiếu cột: service_name, username, password",
+    csvNoRows:          "Không tìm thấy dòng dữ liệu hợp lệ",
+    currentPwWrong:     "Mật khẩu hiện tại không đúng",
+    newPwShort:         "Mật khẩu mới phải có ít nhất 6 ký tự",
+    pwMismatch:         "Mật khẩu xác nhận không khớp",
+    reEncrypting:       "Đang mã hóa lại {n}/{total}...",
+    doneReEncrypt:      "Hoàn tất - đã mã hóa lại {n} bản ghi",
+    delConfirmTitle:    "Xóa tài khoản?",
+    delConfirmMsg:      "Xóa vĩnh viễn <strong style=\"color:var(--tx)\">{name}</strong>? Không thể hoàn tác.",
+    delBtn:             "Xóa vĩnh viễn",
+    editAccount:        "Chỉnh sửa tài khoản",
+    keepPwPh:           "Để trống để giữ mật khẩu cũ",
+    revealBtn:          "&#128274; Hiện mật khẩu",
+    copyPwBtn:          "Sao chép MK",
+    editItemBtn:        "Sửa",
+    deleteItemBtn:      "Xóa",
+    visitLink:          "Truy cập",
+    changePwDrawerTitle:"Đổi Mật khẩu Master",
+    changePwWarning:    "Thao tác này sẽ mã hóa lại TOÀN BỘ mật khẩu bằng mật khẩu Master mới.",
+    currentPwLabel:     "Mật khẩu hiện tại",
+    newPwLabel:         "Mật khẩu mới",
+    confirmPwLabel:     "Xác nhận mật khẩu mới",
+    changePwBtn:        "Đổi mật khẩu",
+    iprService:         "Dịch vụ",
+    iprUsername:        "Tài khoản",
+    iprType:            "Loại",
+    andMore:            "... và {n} khác",
+    willImport:         "Sẽ mã hóa và lưu {n} tài khoản.",
+  }
+};
+
+function t(key, vars) {
+  var s = (STRINGS[LANG] || STRINGS.en)[key] || (STRINGS.en[key]) || key;
+  if (vars) { for (var k in vars) s = s.replace("{"+k+"}", vars[k]); }
+  return s;
+}
+
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    el.innerHTML = t(el.getAttribute("data-i18n"));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el) {
+    el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(function(el) {
+    el.title = t(el.getAttribute("data-i18n-title"));
+  });
+  ["lock-lang-en","lock-lang-vi","app-lang-en","app-lang-vi"].forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    el.classList.toggle("active", id.endsWith(LANG));
+  });
+  if (MASTER_RAW) { buildChips(); renderList(); }
+  localStorage.setItem("mv_lang", LANG);
+}
+
+function setLang(lang) {
+  LANG = lang;
+  FILTER = t("all");
+  applyLang();
+}
+
+// ══════════════════════════════════════════════════════════
+// ❶ CRYPTO MODULE — PBKDF2 + AES-GCM (Web Crypto API native)
+//    Nhanh (~50ms cho 100k iterations), không cần thư viện ngoài
+// ══════════════════════════════════════════════════════════
+
+function u8ToHex(u8) {
+  return Array.from(u8).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+function hexToU8(hex) {
+  var a = new Uint8Array(hex.length / 2);
+  for (var i = 0; i < hex.length; i += 2) a[i/2] = parseInt(hex.slice(i,i+2), 16);
+  return a;
+}
+function u8ToB64(u8) { return btoa(String.fromCharCode.apply(null, u8)); }
+function b64ToU8(b64) {
+  var bin = atob(b64), a = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return a;
+}
+
+// Khởi tạo PBKDF2 key từ master password (gọi mỗi lần unlock)
+async function initCrypto(password) {
+  // Dùng FIXED_SALT thay vì localStorage — đảm bảo cùng key trên mọi thiết bị.
+  // Xóa luôn salt cũ nếu còn sót trong localStorage của lần trước.
+  localStorage.removeItem('mv_kdf_salt');
+  var enc = new TextEncoder();
+  var saltU8 = enc.encode(FIXED_SALT);
+  var keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+  );
+  DERIVED_KEY = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:saltU8, iterations:KDF_ITER, hash:'SHA-256' },
+    keyMaterial,
+    { name:'AES-GCM', length:256 },
+    false, ['encrypt','decrypt']
+  );
+}
+
+// Mã hóa mới: định dạng "v2:<iv_hex>:<ct_base64>"
+async function encryptData(plaintext) {
+  if (!plaintext) return '';
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var ct = await crypto.subtle.encrypt(
+    { name:'AES-GCM', iv:iv }, DERIVED_KEY,
+    new TextEncoder().encode(plaintext)
+  );
+  return 'v2:' + u8ToHex(iv) + ':' + u8ToB64(new Uint8Array(ct));
+}
+
+// Mã hóa với key tùy chỉnh (dùng khi đổi master password)
+async function encryptWithKey(plaintext, cryptoKey) {
+  if (!plaintext) return '';
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var ct = await crypto.subtle.encrypt(
+    { name:'AES-GCM', iv:iv }, cryptoKey,
+    new TextEncoder().encode(plaintext)
+  );
+  return 'v2:' + u8ToHex(iv) + ':' + u8ToB64(new Uint8Array(ct));
+}
+
+// Giải mã tự động: nhận diện format cũ (CryptoJS) và mới (v2)
+async function decryptData(ciphertext) {
+  if (!ciphertext) return '';
+  if (ciphertext.startsWith('v2:')) {
+    // ── Format mới: PBKDF2 + AES-GCM ──
+    try {
+      var parts = ciphertext.split(':');
+      var iv = hexToU8(parts[1]);
+      var ct = b64ToU8(parts[2]);
+      var plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv:iv }, DERIVED_KEY, ct);
+      return new TextDecoder().decode(plain);
+    } catch(e) { return ''; }
+  } else {
+    // ── Format cũ: CryptoJS AES (backward compat) ──
+    try {
+      return CryptoJS.AES.decrypt(ciphertext, MASTER_RAW).toString(CryptoJS.enc.Utf8) || '';
+    } catch(e) { return ''; }
+  }
+}
+
+// ❷ AUTH TOKEN — SHA-256(master) gửi kèm mọi API write request
+//    GAS script check token này để chặn người lạ xóa/sửa dữ liệu
+async function computeAuthToken(password) {
+  var hash = await crypto.subtle.digest(
+    'SHA-256', new TextEncoder().encode('myvault:' + password)
+  );
+  return u8ToHex(new Uint8Array(hash));
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+window.addEventListener('load', function() {
+  FILTER = t("all");
+  applyLang();
+  if (window.PasswordCredential || window.FederatedCredential) {
+    document.getElementById("lhint").classList.add("show");
+  }
+  setTimeout(function() {
+    var inp = document.getElementById("master-input");
+    if (inp) inp.focus();
+  }, 300);
+});
+
+// ══════════════════════════════════════════════════════════
+// AUTO-LOCK
+// ══════════════════════════════════════════════════════════
+function resetLockTimer() {
   clearTimeout(LOCK_TIMER);
-  LOCK_TIMER=setTimeout(function(){
-    if(MASTER){ doLock(); toast("Auto-locked after 5 minutes"); }
+  LOCK_TIMER = setTimeout(function() {
+    if (MASTER_RAW) { doLock(); toast(t("autoLocked")); }
   }, LOCK_DELAY);
 }
-document.addEventListener("click",resetLockTimer);
-document.addEventListener("keydown",resetLockTimer);
-document.addEventListener("touchstart",resetLockTimer);
+document.addEventListener("click", resetLockTimer);
+document.addEventListener("keydown", resetLockTimer);
+document.addEventListener("touchstart", resetLockTimer);
 
-// ── API CALLS (fetch instead of google.script.run) ───────────
+// ══════════════════════════════════════════════════════════
+// API — AUTH_TOKEN được gửi kèm POST body
+// ══════════════════════════════════════════════════════════
 function apiGet(params) {
-  var url = GAS_URL + "?" + Object.keys(params).map(function(k){ return k+"="+encodeURIComponent(params[k]); }).join("&");
+  var url = GAS_URL + "?" + Object.keys(params).map(function(k){
+    return k+"="+encodeURIComponent(params[k]);
+  }).join("&");
   return fetch(url).then(function(r){ return r.json(); });
 }
 function apiPost(body) {
+  body._auth = AUTH_TOKEN; // GAS nhận field này để xác thực
   return fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(body)
+    method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(body)
   }).then(function(r){ return r.json(); });
 }
 
-// ── AUTH ─────────────────────────────────────────────────────
-function doUnlock() {
-  var pw = document.getElementById("master-input").value;
+// ══════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════
+async function doUnlock() {
+  var pw = document.getElementById("master-input").value.trim(); // .trim() tránh lỗi dấu cách vô tình trên mobile
   if (!pw) return;
-  MASTER = pw;
-  document.getElementById("lock-screen").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("lerr").style.display = "none";
-  resetLockTimer();
-  loadAccounts();
+
+  var btn = document.getElementById("unlock-btn");
+  btn.disabled = true;
+  btn.innerHTML = t("unlocking"); // hiện loading state
+
+  try {
+    MASTER_RAW = pw;
+    await initCrypto(pw);              // PBKDF2 key derivation (~50ms)
+    AUTH_TOKEN = await computeAuthToken(pw); // SHA-256 for API auth
+
+    FILTER = t("all");
+    document.getElementById("lock-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("lerr").style.display = "none";
+    resetLockTimer();
+    loadAccounts();
+  } catch(e) {
+    MASTER_RAW = ''; DERIVED_KEY = null; AUTH_TOKEN = '';
+    document.getElementById("lerr").style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = t("unlockBtn");
+  }
 }
+
 function doLock() {
   clearTimeout(LOCK_TIMER);
-  MASTER=""; DATA=[]; FILTER="All"; SEARCH="";
+  // Xóa sạch state nhạy cảm khỏi bộ nhớ
+  MASTER_RAW = ''; DERIVED_KEY = null; AUTH_TOKEN = '';
+  DATA = []; SEARCH = ''; FILTER = t("all");
   document.getElementById("master-input").value = "";
   document.getElementById("app").style.display = "none";
   document.getElementById("lock-screen").style.display = "flex";
   closeDrawer();
+  setTimeout(function() {
+    var inp = document.getElementById("master-input"); if (inp) inp.focus();
+  }, 300);
 }
 
-// ── NAVIGATION ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════
 function showPanel(n) {
   document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("active"); });
   document.querySelectorAll(".nb").forEach(function(b){ b.classList.remove("active"); });
@@ -373,7 +855,7 @@ function showPanel(n) {
   var sw = document.getElementById("srchwrap");
   if (n === "vault") { sw.classList.add("show"); document.getElementById("srch-btn").style.display="none"; renderList(); }
   else { sw.classList.remove("show"); document.getElementById("srch-btn").style.display="flex"; }
-  if (n === "settings") document.getElementById("stat-n").textContent = DATA.length;
+  if (n === "settings") { document.getElementById("stat-n").textContent = DATA.length; updateEncStatusUI(); }
 }
 function toggleSearch() {
   SRCH = !SRCH;
@@ -383,44 +865,57 @@ function toggleSearch() {
   else { document.getElementById("srch").value=""; SEARCH=""; renderList(); }
 }
 
-// ── DATA ─────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
 function loadAccounts() {
-  document.getElementById("acc-list").innerHTML = '<div class="empty"><div class="et">Loading...</div></div>';
-  apiGet({ action: "getAccounts" })
+  document.getElementById("acc-list").innerHTML =
+    '<div class="empty"><div class="et">'+t("loading")+'</div></div>';
+  apiGet({action:"getAccounts"})
     .then(function(rows) {
       DATA = rows || [];
       buildChips();
       renderList();
+      checkUpgradeNeeded(); // kiểm tra có cần nâng cấp không
     })
     .catch(function(e) {
-      document.getElementById("acc-list").innerHTML = '<div class="empty"><div class="ei">&#9888;</div><div class="et">Load failed</div><div class="es">'+esc(e.message)+'</div></div>';
+      document.getElementById("acc-list").innerHTML =
+        '<div class="empty"><div class="ei">&#9888;</div><div class="et">'+t("loadFailed")+'</div><div class="es">'+esc(e.message)+'</div></div>';
     });
 }
 
 function buildChips() {
-  var types = ["All"];
-  for (var i=0; i<DATA.length; i++) { var t=DATA[i].type||"General"; if(types.indexOf(t)<0) types.push(t); }
+  var allLabel = t("all");
+  var types = [allLabel];
+  for (var i=0; i<DATA.length; i++) {
+    var tp = DATA[i].type || t("general");
+    if (types.indexOf(tp) < 0) types.push(tp);
+  }
+  if (types.indexOf(FILTER) < 0) FILTER = allLabel;
   var html = "";
   for (var j=0; j<types.length; j++) {
-    html += '<button class="chip'+(FILTER===types[j]?" active":"")+'" onclick="setFilter(\''+esc(types[j])+'\')">'+esc(types[j])+'</button>';
+    html += '<button class="chip'+(FILTER===types[j]?" active":"")+'\" onclick="setFilter(\''+esc(types[j])+'\')">'+esc(types[j])+'</button>';
   }
   document.getElementById("chips").innerHTML = html;
 }
+
 function setFilter(f) { FILTER=f; buildChips(); renderList(); }
 function onSearch() { SEARCH=document.getElementById("srch").value.toLowerCase(); renderList(); }
 
 function renderList() {
-  var q=SEARCH, filtered=[];
+  var q=SEARCH, allLabel=t("all"), filtered=[];
   for (var i=0; i<DATA.length; i++) {
     var a=DATA[i];
-    if (FILTER!=="All" && (a.type||"General")!==FILTER) continue;
+    if (FILTER!==allLabel && (a.type||t("general"))!==FILTER) continue;
     if (q && a.service_name.toLowerCase().indexOf(q)<0 && a.username.toLowerCase().indexOf(q)<0 &&
         (a.type||"").toLowerCase().indexOf(q)<0 && (a.url||"").toLowerCase().indexOf(q)<0) continue;
     filtered.push(a);
   }
   var el = document.getElementById("acc-list");
   if (!filtered.length) {
-    el.innerHTML='<div class="empty"><div class="ei">&#128274;</div><div class="et">'+(DATA.length?"No results":"Vault is empty")+'</div><div class="es">'+(DATA.length?"Try different search":"Tap + to add your first account")+'</div></div>';
+    el.innerHTML='<div class="empty"><div class="ei">&#128274;</div><div class="et">'+
+      (DATA.length?t("noResults"):t("vaultEmpty"))+'</div><div class="es">'+
+      (DATA.length?t("noResultsSub"):t("vaultEmptySub"))+'</div></div>';
     return;
   }
   var rows="";
@@ -429,14 +924,92 @@ function renderList() {
     rows+='<tr onclick="openDetail(\''+esc(a.id)+'\')">'+
       '<td><div class="td-svc"><div class="av '+av+'">'+ini+'</div><span class="td-name">'+esc(a.service_name)+'</span></div></td>'+
       '<td class="td-user">'+esc(a.username)+'</td>'+
-      '<td><span class="at">'+esc(a.type||"General")+'</span></td>'+
+      '<td><span class="at">'+esc(a.type||t("general"))+'</span></td>'+
       '<td class="td-action"><button onclick="event.stopPropagation();openDetail(\''+esc(a.id)+'\')" title="View">&#8250;</button></td>'+
       '</tr>';
   }
-  el.innerHTML='<div class="lw"><table class="tbl"><thead><tr><th>Service</th><th>Username</th><th>Category</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  el.innerHTML='<div class="lw"><table class="tbl"><thead><tr><th>'+t("colService")+'</th><th>'+t("colUser")+'</th><th>'+t("colCat")+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
-// ── DETAIL ───────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// ENCRYPTION UPGRADE (v1 → v2)
+// ══════════════════════════════════════════════════════════
+function isUpgraded() { return localStorage.getItem(UPGRADED_KEY) === 'done'; }
+
+function updateEncStatusUI() {
+  var hint = document.getElementById("enc-status-hint");
+  var icon = document.getElementById("enc-status-icon");
+  var statEnc = document.getElementById("stat-enc");
+  if (!hint) return;
+  if (isUpgraded() || !DATA.length) {
+    hint.textContent = t("encStatusV2");
+    if (icon) { icon.textContent = "✓"; icon.style.color = "var(--gn)"; }
+    if (statEnc) { statEnc.textContent = "PBKDF2"; statEnc.style.fontSize="13px"; statEnc.style.paddingTop="6px"; }
+  } else {
+    hint.textContent = t("encStatusOld");
+    if (icon) { icon.textContent = "›"; icon.style.color = ""; }
+    if (statEnc) { statEnc.textContent = "Mixed"; statEnc.style.color = "var(--rd)"; }
+  }
+}
+
+function checkUpgradeNeeded() {
+  if (!DATA.length || isUpgraded()) return;
+  // Hiện banner gọn nhẹ ở đầu danh sách
+  var existing = document.getElementById("upgrade-banner");
+  if (existing) return;
+  var banner = document.createElement("div");
+  banner.id = "upgrade-banner";
+  banner.className = "upgrade-banner";
+  banner.innerHTML =
+    '<span>&#128274; ' + t("encStatusOld") + '</span>' +
+    '<button class="btn btn-p btn-sm" onclick="doUpgradeEncryption()">' + t("upgradeBtn") + '</button>' +
+    '<button class="btn btn-g btn-sm" onclick="dismissUpgrade()">' + t("cancelBtn") + '</button>';
+  var panel = document.getElementById("panel-vault");
+  var accList = document.getElementById("acc-list");
+  panel.insertBefore(banner, accList);
+}
+
+function dismissUpgrade() {
+  localStorage.setItem(UPGRADED_KEY, 'done');
+  var b = document.getElementById("upgrade-banner"); if (b) b.remove();
+  updateEncStatusUI();
+}
+
+async function doUpgradeEncryption() {
+  if (!DATA.length) { dismissUpgrade(); return; }
+  var banner = document.getElementById("upgrade-banner");
+  var total = DATA.length, done = 0;
+
+  for (var i = 0; i < DATA.length; i++) {
+    try {
+      var cipher = await apiGet({action:'getCiphertext', id: DATA[i].id});
+      if (!cipher) { done++; continue; }
+      if (cipher.password_encrypted && cipher.password_encrypted.startsWith('v2:')) { done++; continue; }
+
+      var decPw = await decryptData(cipher.password_encrypted);
+      var decN  = cipher.notes_encrypted ? await decryptData(cipher.notes_encrypted) : '';
+      if (!decPw) { done++; continue; }
+
+      await apiPost({ action:'updateAccount', payload:{
+        id: DATA[i].id,
+        password_encrypted: await encryptData(decPw),
+        notes_encrypted: decN ? await encryptData(decN) : ''
+      }});
+    } catch(e) { /* skip failed records */ }
+    done++;
+    if (banner) banner.querySelector("span").textContent =
+      "⏳ " + t("encStatusUpgrading", {n: done + "/" + total});
+  }
+
+  localStorage.setItem(UPGRADED_KEY, 'done');
+  if (banner) banner.remove();
+  toast(t("upgradeDone"));
+  updateEncStatusUI();
+}
+
+// ══════════════════════════════════════════════════════════
+// DETAIL DRAWER
+// ══════════════════════════════════════════════════════════
 function openDetail(id) {
   var a=findById(id); if(!a) return;
   var av="av"+(chCode(a.service_name)%10);
@@ -444,102 +1017,115 @@ function openDetail(id) {
     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'+
       '<div class="av '+av+'" style="width:50px;height:50px;border-radius:13px;font-size:21px">'+(a.service_name[0]||"?").toUpperCase()+'</div>'+
       '<div><div style="font-size:19px;font-weight:700">'+esc(a.service_name)+'</div>'+
-        '<div style="font-size:13px;color:var(--tx2);margin-top:2px">'+esc(a.type||"General")+(a.url?' &middot; <a href="'+esc(a.url)+'" target="_blank" style="color:var(--ac2);text-decoration:none">Visit</a>':"")+'</div>'+
+        '<div style="font-size:13px;color:var(--tx2);margin-top:2px">'+esc(a.type||t("general"))+
+        (a.url?' &middot; <a href="'+esc(a.url)+'" target="_blank" style="color:var(--ac2);text-decoration:none">'+t("visitLink")+'</a>':"")+'</div>'+
       '</div></div>'+
-    '<div class="field"><label>Username / Email</label><div style="display:flex;gap:8px;align-items:center"><div style="flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;font-size:14px">'+esc(a.username)+'</div><button class="btn btn-g btn-sm" onclick="cpText(\''+esc(a.username)+'\')">Copy</button></div></div>'+
-    '<div class="field"><label>Password</label><div class="pwd locked" id="pwbox"></div></div>'+
-    '<div class="field" id="nwrap" style="display:none"><label>Notes</label><div style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;font-size:13px;color:var(--tx2);white-space:pre-wrap;line-height:1.5" id="nbox"></div></div>'+
-    '<div class="brow"><button class="btn btn-p btn-sm" onclick="revealPw(\''+esc(id)+'\')">&#128274; Reveal</button><button class="btn btn-g btn-sm" id="cpbtn" style="display:none" onclick="cpPw()">Copy PW</button><button class="btn btn-g btn-sm" onclick="openEdit(\''+esc(id)+'\')">Edit</button><button class="btn btn-d btn-sm" onclick="confirmDel(\''+esc(id)+'\')">Delete</button></div>';
+    '<div class="field"><label>'+t("fUser")+'</label><div style="display:flex;gap:8px;align-items:center">'+
+      '<div style="flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;font-size:14px">'+esc(a.username)+'</div>'+
+      '<button class="btn btn-g btn-sm" onclick="cpText(\''+esc(a.username)+'\')">Copy</button></div></div>'+
+    '<div class="field"><label>'+t("fPw")+'</label><div class="pwd locked" id="pwbox"></div></div>'+
+    '<div class="field" id="nwrap" style="display:none"><label>'+t("fNotes")+'</label>'+
+      '<div style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;font-size:13px;color:var(--tx2);white-space:pre-wrap;line-height:1.5" id="nbox"></div></div>'+
+    '<div class="brow">'+
+      '<button class="btn btn-p btn-sm" onclick="revealPw(\''+esc(id)+'\')">'+t("revealBtn")+'</button>'+
+      '<button class="btn btn-g btn-sm" id="cpbtn" style="display:none" onclick="cpPw()">'+t("copyPwBtn")+'</button>'+
+      '<button class="btn btn-g btn-sm" onclick="openEdit(\''+esc(id)+'\')">'+t("editItemBtn")+'</button>'+
+      '<button class="btn btn-d btn-sm" onclick="confirmDel(\''+esc(id)+'\')">'+t("deleteItemBtn")+'</button>'+
+    '</div>';
   openDrawer();
 }
 
-function revealPw(id) {
-  apiGet({ action: "getCiphertext", id: id })
-    .then(function(d) {
-      if (!d) { toast("Record not found"); return; }
-      try {
-        var dec = CryptoJS.AES.decrypt(d.password_encrypted, MASTER).toString(CryptoJS.enc.Utf8);
-        if (!dec) { toast("Wrong Master Password"); return; }
-        var box = document.getElementById("pwbox"); if (!box) return;
-        box.textContent = dec; box.classList.remove("locked");
-        document.getElementById("cpbtn").style.display = "inline-flex";
-        if (d.notes_encrypted) {
-          var note = CryptoJS.AES.decrypt(d.notes_encrypted, MASTER).toString(CryptoJS.enc.Utf8);
-          if (note) { document.getElementById("nbox").textContent=note; document.getElementById("nwrap").style.display="block"; }
-        }
-      } catch(e) { toast("Decryption failed"); }
-    })
-    .catch(function(e){ toast("Error: "+e.message); });
+async function revealPw(id) {
+  var d = await apiGet({action:"getCiphertext", id:id}).catch(function(e){ toast("Error: "+e.message); return null; });
+  if (!d) { toast(t("recordNotFound")); return; }
+  try {
+    var dec = await decryptData(d.password_encrypted);
+    if (!dec) { toast(t("wrongPw")); return; }
+    var box = document.getElementById("pwbox"); if (!box) return;
+    box.textContent = dec; box.classList.remove("locked");
+    document.getElementById("cpbtn").style.display = "inline-flex";
+    if (d.notes_encrypted) {
+      var note = await decryptData(d.notes_encrypted);
+      if (note) { document.getElementById("nbox").textContent=note; document.getElementById("nwrap").style.display="block"; }
+    }
+  } catch(e) { toast(t("decryptFailed")); }
 }
 function cpPw(){ var b=document.getElementById("pwbox"); if(b&&b.textContent&&!b.classList.contains("locked")) cpText(b.textContent); }
 
-// ── ADD / EDIT ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// ADD / EDIT
+// ══════════════════════════════════════════════════════════
 function openEdit(id) {
   var a=findById(id); if(!a) return;
   closeDrawer(); EDIT_ID=id;
-  document.getElementById("add-lbl").textContent="Edit Account";
+  document.getElementById("add-lbl").textContent=t("editAccount");
   document.getElementById("f-service").value=a.service_name||"";
   document.getElementById("f-user").value=a.username||"";
   document.getElementById("f-pw").value="";
-  document.getElementById("f-pw").placeholder="Leave blank to keep current password";
-  document.getElementById("f-type").value=a.type||"General";
+  document.getElementById("f-pw").placeholder=t("keepPwPh");
+  document.getElementById("f-type").value=a.type||t("general");
   document.getElementById("f-url").value=a.url||"";
   document.getElementById("f-notes").value="";
-  document.getElementById("save-btn").textContent="Save Changes";
+  document.getElementById("save-btn").textContent=t("editBtn");
   showPanel("add");
 }
 
-function doSave() {
+async function doSave() {
   var service=document.getElementById("f-service").value.trim();
   var user=document.getElementById("f-user").value.trim();
   var pw=document.getElementById("f-pw").value;
-  var type=document.getElementById("f-type").value.trim()||"General";
+  var type=document.getElementById("f-type").value.trim()||t("general");
   var url=document.getElementById("f-url").value.trim();
   var notes=document.getElementById("f-notes").value.trim();
-  if (!service||!user){toast("Service name and username are required");return;}
-  if (!EDIT_ID&&!pw){toast("Password is required");return;}
-  var btn=document.getElementById("save-btn"); btn.disabled=true; btn.textContent="Saving...";
-
-  var finish=function(ok){ btn.disabled=false; resetForm(); if(ok){toast("Saved!");loadAccounts();showPanel("vault");}else toast("Save failed"); };
-
-  if (EDIT_ID) {
-    var p={id:EDIT_ID,service_name:service,username:user,type:type,url:url};
-    if(pw) p.password_encrypted=CryptoJS.AES.encrypt(pw,MASTER).toString();
-    if(notes) p.notes_encrypted=CryptoJS.AES.encrypt(notes,MASTER).toString();
-    apiPost({action:"updateAccount",payload:p}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error: "+e.message);btn.disabled=false;resetForm();});
-  } else {
-    var p2={service_name:service,username:user,type:type,url:url,
-      password_encrypted:CryptoJS.AES.encrypt(pw,MASTER).toString(),
-      notes_encrypted:notes?CryptoJS.AES.encrypt(notes,MASTER).toString():""};
-    apiPost({action:"saveAccount",payload:p2}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error: "+e.message);btn.disabled=false;resetForm();});
-  }
+  if (!service||!user){ toast(t("reqFields")); return; }
+  if (!EDIT_ID&&!pw){ toast(t("pwRequired")); return; }
+  var btn=document.getElementById("save-btn"); btn.disabled=true; btn.textContent=t("saving");
+  var finish=function(ok){ btn.disabled=false; resetForm(); if(ok){toast(t("saved"));loadAccounts();showPanel("vault");}else toast(t("saveFailed")); };
+  try {
+    if (EDIT_ID) {
+      var p={id:EDIT_ID, service_name:service, username:user, type:type, url:url};
+      if (pw) p.password_encrypted = await encryptData(pw);
+      if (notes) p.notes_encrypted = await encryptData(notes);
+      apiPost({action:"updateAccount",payload:p}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error:"+e.message);btn.disabled=false;resetForm();});
+    } else {
+      var p2={service_name:service, username:user, type:type, url:url,
+        password_encrypted: await encryptData(pw),
+        notes_encrypted: notes ? await encryptData(notes) : ''};
+      apiPost({action:"saveAccount",payload:p2}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error:"+e.message);btn.disabled=false;resetForm();});
+    }
+  } catch(e) { toast(t("saveFailed")); btn.disabled=false; resetForm(); }
 }
 
 function resetForm(){
   EDIT_ID=null;
-  document.getElementById("add-lbl").textContent="New Account";
+  document.getElementById("add-lbl").innerHTML=t("newAccount");
   ["f-service","f-user","f-pw","f-url","f-notes"].forEach(function(id){document.getElementById(id).value="";});
-  document.getElementById("f-pw").placeholder="Service password";
+  document.getElementById("f-pw").placeholder=t("fPwPh");
   document.getElementById("f-type").value="";
   document.getElementById("save-btn").disabled=false;
-  document.getElementById("save-btn").textContent="Encrypt & Save";
+  document.getElementById("save-btn").innerHTML=t("saveBtn");
 }
 
-// ── DELETE ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// DELETE
+// ══════════════════════════════════════════════════════════
 function confirmDel(id){
   var a=findById(id);
   document.getElementById("dbody").innerHTML=
-    '<div class="dt" style="color:var(--rd)">Delete Account?</div>'+
-    '<p style="color:var(--tx2);font-size:14px;margin-bottom:20px;line-height:1.6">Permanently delete <strong style="color:var(--tx)">'+esc(a?a.service_name:id)+'</strong>? Cannot be undone.</p>'+
-    '<div class="brow"><button class="btn btn-d" style="flex:1" onclick="doDel(\''+esc(id)+'\')">Delete permanently</button><button class="btn btn-g" style="flex:1" onclick="closeDrawer()">Cancel</button></div>';
+    '<div class="dt" style="color:var(--rd)">'+t("delConfirmTitle")+'</div>'+
+    '<p style="color:var(--tx2);font-size:14px;margin-bottom:20px;line-height:1.6">'+t("delConfirmMsg",{name:esc(a?a.service_name:id)})+'</p>'+
+    '<div class="brow"><button class="btn btn-d" style="flex:1" onclick="doDel(\''+esc(id)+'\')">'+t("delBtn")+'</button>'+
+    '<button class="btn btn-g" style="flex:1" onclick="closeDrawer()">'+t("cancelBtn")+'</button></div>';
 }
 function doDel(id){
   apiPost({action:"deleteAccount",id:id}).then(function(r){
-    if(r&&r.success){toast("Deleted");closeDrawer();loadAccounts();}else toast("Delete failed");
-  }).catch(function(e){toast("Error: "+e.message);});
+    if(r&&r.success){toast(t("deleted"));closeDrawer();loadAccounts();}else toast(t("deleteFailed"));
+  }).catch(function(e){toast("Error:"+e.message);});
 }
 
-// ── IMPORT ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// IMPORT
+// ══════════════════════════════════════════════════════════
 function dlTpl(){
   var csv="service_name,username,password,type,url,notes\nGmail,user@gmail.com,mypass123,Work,https://gmail.com,backup: other@mail.com";
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="myvault_template.csv";a.click();
@@ -549,98 +1135,180 @@ function onDragLeave(){document.getElementById("dropzone").classList.remove("ove
 function onDrop(e){e.preventDefault();document.getElementById("dropzone").classList.remove("over");var f=e.dataTransfer.files[0];if(f)procFile(f);}
 function onFileSel(e){if(e.target.files[0])procFile(e.target.files[0]);}
 function procFile(f){
-  if(!f.name.toLowerCase().endsWith(".csv")){toast("Please use a .csv file");return;}
+  if(!f.name.toLowerCase().endsWith(".csv")){toast(t("csvOnly"));return;}
   var r=new FileReader();r.onload=function(e){parseCSV(e.target.result);};r.readAsText(f);
 }
 function parseCSV(text){
   var lines=text.split("\n").filter(function(l){return l.trim();});
-  if(lines.length<2){toast("File is empty");return;}
+  if(lines.length<2){toast(t("csvEmpty"));return;}
   var hdr=lines[0].toLowerCase().split(",").map(function(h){return h.trim().replace(/"/g,"");});
   var iS=hdr.indexOf("service_name"),iU=hdr.indexOf("username"),iP=hdr.indexOf("password"),iT=hdr.indexOf("type"),iUr=hdr.indexOf("url"),iN=hdr.indexOf("notes");
-  if(iS<0||iU<0||iP<0){toast("Missing columns: service_name, username, password");return;}
+  if(iS<0||iU<0||iP<0){toast(t("csvMissingCols"));return;}
   IROWS=[];
   for(var i=1;i<lines.length;i++){
     var c=csvSplit(lines[i]),s=gc(c,iS),u=gc(c,iU),p=gc(c,iP);
     if(!s||!u||!p)continue;
-    IROWS.push({service_name:s,username:u,raw_password:p,type:gc(c,iT)||"General",url:gc(c,iUr)||"",notes:gc(c,iN)||""});
+    IROWS.push({service_name:s,username:u,raw_password:p,type:gc(c,iT)||t("general"),url:gc(c,iUr)||"",notes:gc(c,iN)||""});
   }
-  if(!IROWS.length){toast("No valid rows found");return;}
-  var html='<div class="ipr hdr"><span class="ic1">Service</span><span class="ic2">Username</span><span class="ic3">Type</span></div>';
+  if(!IROWS.length){toast(t("csvNoRows"));return;}
+  var html='<div class="ipr hdr"><span class="ic1">'+t("iprService")+'</span><span class="ic2">'+t("iprUsername")+'</span><span class="ic3">'+t("iprType")+'</span></div>';
   IROWS.slice(0,5).forEach(function(r){html+='<div class="ipr"><span class="ic1">'+esc(r.service_name)+'</span><span class="ic2">'+esc(r.username)+'</span><span class="ic3">'+esc(r.type)+'</span></div>';});
-  if(IROWS.length>5)html+='<div class="ipr" style="color:var(--tx3);font-size:12px">... and '+(IROWS.length-5)+' more</div>';
+  if(IROWS.length>5)html+='<div class="ipr" style="color:var(--tx3);font-size:12px">'+t("andMore",{n:IROWS.length-5})+'</div>';
   var prev=document.getElementById("iprev");prev.innerHTML=html;prev.style.display="block";
-  document.getElementById("iwarn").textContent=IROWS.length+" accounts will be encrypted and saved.";
+  document.getElementById("iwarn").textContent=t("willImport",{n:IROWS.length});
   document.getElementById("iact").style.display="block";
 }
-function gc(arr,idx){return idx>=0&&arr[idx]?arr[idx].trim().replace(/^"|"$/g,""):"";}
+function gc(arr,idx){return idx>=0&&arr[idx]?arr[idx].trim().replace(/^"|"$/g,""):""}
 function csvSplit(line){var res=[],cur="",inQ=false;for(var i=0;i<line.length;i++){var c=line[i];if(c==='"')inQ=!inQ;else if(c===','&&!inQ){res.push(cur);cur="";}else cur+=c;}res.push(cur);return res;}
-function doImport(){
+
+async function doImport(){
   if(!IROWS.length)return;
-  var btn=document.getElementById("ibtn");btn.disabled=true;btn.textContent="Encrypting...";
-  var enc=IROWS.map(function(r){return{service_name:r.service_name,username:r.username,type:r.type,url:r.url,
-    password_encrypted:CryptoJS.AES.encrypt(r.raw_password,MASTER).toString(),
-    notes_encrypted:r.notes?CryptoJS.AES.encrypt(r.notes,MASTER).toString():""};});
-  apiPost({action:"saveAccountsBatch",payload:enc})
-    .then(function(res){
-      btn.disabled=false;btn.textContent="Encrypt & Import";
-      if(res&&res.success){toast("Imported "+res.count+" accounts");clearImport();loadAccounts();showPanel("vault");}
-      else toast("Import failed");
-    }).catch(function(e){btn.disabled=false;btn.textContent="Encrypt & Import";toast("Error: "+e.message);});
+  var btn=document.getElementById("ibtn");btn.disabled=true;btn.textContent=t("encrypting");
+  try {
+    var enc=[];
+    for(var i=0;i<IROWS.length;i++){
+      var r=IROWS[i];
+      enc.push({service_name:r.service_name,username:r.username,type:r.type,url:r.url,
+        password_encrypted: await encryptData(r.raw_password),
+        notes_encrypted: r.notes ? await encryptData(r.notes) : ''});
+    }
+    apiPost({action:"saveAccountsBatch",payload:enc})
+      .then(function(res){
+        btn.disabled=false; btn.innerHTML=t("importBtn");
+        if(res&&res.success){toast(t("imported")+" "+res.count);clearImport();loadAccounts();showPanel("vault");}
+        else toast(t("importFailed"));
+      }).catch(function(e){btn.disabled=false;btn.innerHTML=t("importBtn");toast("Error:"+e.message);});
+  } catch(e) { btn.disabled=false; btn.innerHTML=t("importBtn"); toast(t("importFailed")); }
 }
 function clearImport(){IROWS=[];document.getElementById("iprev").style.display="none";document.getElementById("iprev").innerHTML="";document.getElementById("iact").style.display="none";document.getElementById("fi").value="";}
 
-// ── BACKUP ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// BACKUP
+// ══════════════════════════════════════════════════════════
 function doBackup(){
   var blob=new Blob([JSON.stringify({vault:DATA,exported:new Date().toISOString(),note:"Ciphertext only - requires Master Password"},null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="myvault_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();
-  toast("Backup downloaded");
+  toast(t("backupDownloaded"));
 }
 
-// ── CHANGE MASTER PW ──────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// CHANGE MASTER PASSWORD (async, re-derive PBKDF2 key)
+// ══════════════════════════════════════════════════════════
 function showChangePw(){
   document.getElementById("dbody").innerHTML=
-    '<div class="dt">Change Master Password</div>'+
-    '<div class="wbox">This will re-encrypt ALL passwords with the new Master Password.</div>'+
-    '<div class="field"><label>Current Password</label><div class="iw iwa"><input type="password" id="cp-old" autocomplete="off"><button class="ia" onclick="toggleEye(\'cp-old\',this)">&#128065;</button></div></div>'+
-    '<div class="field"><label>New Password</label><div class="iw iwa"><input type="password" id="cp-new" autocomplete="new-password"><button class="ia" onclick="toggleEye(\'cp-new\',this)">&#128065;</button></div></div>'+
-    '<div class="field"><label>Confirm New Password</label><input type="password" id="cp-conf" autocomplete="new-password"></div>'+
-    '<div class="brow"><button class="btn btn-p" style="flex:1" onclick="doChangePw()">Change Password</button><button class="btn btn-g btn-sm" onclick="closeDrawer()">Cancel</button></div>';
+    '<div class="dt">'+t("changePwDrawerTitle")+'</div>'+
+    '<div class="wbox">'+t("changePwWarning")+'</div>'+
+    '<div class="field"><label>'+t("currentPwLabel")+'</label><div class="iw iwa"><input type="password" id="cp-old" autocomplete="off"><button class="ia" onclick="toggleEye(\'cp-old\',this)">&#128065;</button></div></div>'+
+    '<div class="field"><label>'+t("newPwLabel")+'</label><div class="iw iwa"><input type="password" id="cp-new" autocomplete="new-password"><button class="ia" onclick="toggleEye(\'cp-new\',this)">&#128065;</button></div></div>'+
+    '<div class="field"><label>'+t("confirmPwLabel")+'</label><input type="password" id="cp-conf" autocomplete="new-password"></div>'+
+    '<div class="brow"><button class="btn btn-p" style="flex:1" onclick="doChangePw()">'+t("changePwBtn")+'</button>'+
+    '<button class="btn btn-g btn-sm" onclick="closeDrawer()">'+t("cancelBtn")+'</button></div>';
   openDrawer();
 }
-function doChangePw(){
-  var oldPw=document.getElementById("cp-old").value,newPw=document.getElementById("cp-new").value,conf=document.getElementById("cp-conf").value;
-  if(oldPw!==MASTER){toast("Current password incorrect");return;}
-  if(!newPw||newPw.length<6){toast("New password must be at least 6 chars");return;}
-  if(newPw!==conf){toast("Passwords do not match");return;}
-  if(!DATA.length){MASTER=newPw;toast("Master password changed");closeDrawer();return;}
-  var btn=document.querySelector("#dbody .btn-p");btn.disabled=true;btn.textContent="Re-encrypting...";
+
+async function doChangePw(){
+  var oldPw=document.getElementById("cp-old").value;
+  var newPw=document.getElementById("cp-new").value;
+  var conf =document.getElementById("cp-conf").value;
+  if(oldPw!==MASTER_RAW){toast(t("currentPwWrong"));return;}
+  if(!newPw||newPw.length<6){toast(t("newPwShort"));return;}
+  if(newPw!==conf){toast(t("pwMismatch"));return;}
+
+  var btn=document.querySelector("#dbody .btn-p"); btn.disabled=true; btn.textContent=t("reEncrypting",{n:0,total:DATA.length||0});
+
+  // Tạo PBKDF2 key mới với FIXED_SALT, password mới
+  var enc = new TextEncoder();
+  var km = await crypto.subtle.importKey('raw', enc.encode(newPw), 'PBKDF2', false, ['deriveKey']);
+  var newKey = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:enc.encode(FIXED_SALT), iterations:KDF_ITER, hash:'SHA-256' },
+    km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+  );
+
+  if (!DATA.length) {
+    MASTER_RAW = newPw; DERIVED_KEY = newKey;
+    AUTH_TOKEN = await computeAuthToken(newPw);
+    localStorage.setItem(UPGRADED_KEY, 'done');
+    toast(t("doneReEncrypt",{n:0})); closeDrawer(); return;
+  }
+
   var done=0, total=DATA.length;
-  DATA.forEach(function(row){
-    apiGet({action:"getCiphertext",id:row.id}).then(function(cipher){
-      if(!cipher){done++;if(done>=total){MASTER=newPw;toast("Done - "+done+" records re-encrypted");closeDrawer();}return;}
-      var decPw=CryptoJS.AES.decrypt(cipher.password_encrypted,oldPw).toString(CryptoJS.enc.Utf8);
-      var decN=cipher.notes_encrypted?CryptoJS.AES.decrypt(cipher.notes_encrypted,oldPw).toString(CryptoJS.enc.Utf8):"";
-      var pl={id:row.id,password_encrypted:CryptoJS.AES.encrypt(decPw,newPw).toString(),notes_encrypted:decN?CryptoJS.AES.encrypt(decN,newPw).toString():""};
-      apiPost({action:"updateAccount",payload:pl}).then(function(){done++;if(done>=total){MASTER=newPw;toast("Done - "+done+" records re-encrypted");closeDrawer();}});
-    });
-  });
+  for (var i=0; i<DATA.length; i++) {
+    try {
+      var cipher = await apiGet({action:"getCiphertext", id:DATA[i].id});
+      if (!cipher) { done++; continue; }
+      var decPw = await decryptData(cipher.password_encrypted);
+      var decN  = cipher.notes_encrypted ? await decryptData(cipher.notes_encrypted) : '';
+      var pl = {
+        id: DATA[i].id,
+        password_encrypted: await encryptWithKey(decPw, newKey),
+        notes_encrypted:    decN ? await encryptWithKey(decN, newKey) : ''
+      };
+      await apiPost({action:"updateAccount", payload:pl});
+    } catch(e) { /* skip */ }
+    done++;
+    if (btn) btn.textContent = t("reEncrypting",{n:done, total:total});
+  }
+
+  MASTER_RAW = newPw; DERIVED_KEY = newKey;
+  AUTH_TOKEN = await computeAuthToken(newPw);
+  localStorage.setItem(UPGRADED_KEY, 'done');
+  toast(t("doneReEncrypt",{n:done}));
+  closeDrawer();
+  updateEncStatusUI();
 }
 
-// ── DRAWER ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// DRAWER / UTILS
+// ══════════════════════════════════════════════════════════
 function openDrawer(){document.getElementById("dov").classList.add("open");}
 function closeDrawer(){document.getElementById("dov").classList.remove("open");}
-
-// ── UTILS ─────────────────────────────────────────────────────
-function cpText(t){
-  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast("Copied!");}).catch(function(){fallbackCopy(t);});}
-  else fallbackCopy(t);
+function cpText(tx){
+  if(navigator.clipboard){navigator.clipboard.writeText(tx).then(function(){toast(t("copied"));}).catch(function(){fallbackCopy(tx);});}
+  else fallbackCopy(tx);
 }
-function fallbackCopy(t){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");toast("Copied!");}catch(e){toast("Copy failed");}document.body.removeChild(ta);}
+function fallbackCopy(tx){var ta=document.createElement("textarea");ta.value=tx;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand("copy");toast(t("copied"));}catch(e){toast(t("copyFailed"));}document.body.removeChild(ta);}
 function toggleEye(id,btn){var el=document.getElementById(id);if(el.type==="password"){el.type="text";btn.innerHTML="&#128584;";}else{el.type="password";btn.innerHTML="&#128065;";}}
-function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.className="show";setTimeout(function(){t.className="";},2600);}
+function toast(msg){var tk=document.getElementById("toast");tk.textContent=msg;tk.className="show";setTimeout(function(){tk.className="";},2600);}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function findById(id){for(var i=0;i<DATA.length;i++){if(DATA[i].id===id)return DATA[i];}return null;}
 function chCode(s){var n=0;s=s||"";for(var i=0;i<s.length;i++)n+=s.charCodeAt(i);return n;}
+
+// ══════════════════════════════════════════════════════════
+// EXPOSE to window (cần cho onclick="..." trong HTML)
+// ══════════════════════════════════════════════════════════
+window.doUnlock           = doUnlock;
+window.doLock             = doLock;
+window.showPanel          = showPanel;
+window.toggleSearch       = toggleSearch;
+window.setFilter          = setFilter;
+window.onSearch           = onSearch;
+window.openDetail         = openDetail;
+window.revealPw           = revealPw;
+window.cpPw               = cpPw;
+window.cpText             = cpText;
+window.openEdit           = openEdit;
+window.doSave             = doSave;
+window.resetForm          = resetForm;
+window.confirmDel         = confirmDel;
+window.doDel              = doDel;
+window.doImport           = doImport;
+window.clearImport        = clearImport;
+window.dlTpl              = dlTpl;
+window.onDragOver         = onDragOver;
+window.onDragLeave        = onDragLeave;
+window.onDrop             = onDrop;
+window.onFileSel          = onFileSel;
+window.doBackup           = doBackup;
+window.showChangePw       = showChangePw;
+window.doChangePw         = doChangePw;
+window.toggleEye          = toggleEye;
+window.setLang            = setLang;
+window.closeDrawer        = closeDrawer;
+window.doUpgradeEncryption= doUpgradeEncryption;
+window.dismissUpgrade     = dismissUpgrade;
+window.loadAccounts       = loadAccounts;
+
+})(); // end IIFE
 </script>
 </body>
 </html>
