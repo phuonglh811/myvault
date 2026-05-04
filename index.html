@@ -91,6 +91,22 @@ select option{background:#1c1c27}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--fn)}
 .chip.active{background:var(--ac);border-color:var(--ac);color:#fff}
+/* ── SORT ── */
+.filter-bar{display:flex;align-items:flex-start;gap:8px;padding:4px 0 0}
+.filter-bar .chips{flex:1;padding-bottom:10px}
+.sort-wrap{flex-shrink:0;position:relative;padding-bottom:10px}
+.sort-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--fn);white-space:nowrap;transition:all .15s}
+.sort-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sort-btn.on{border-color:var(--ac);color:var(--ac2);background:rgba(124,106,247,.1)}
+.sort-menu{display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:30;background:var(--sf);border:1px solid var(--bd2);border-radius:var(--rr);padding:5px;min-width:176px;max-width:calc(100vw - 28px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.sort-menu.open{display:block;animation:drop .2s cubic-bezier(0,0,.2,1)}
+.sort-opt{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--rs);cursor:pointer;font-size:13px;border:none;background:none;color:var(--tx2);width:100%;text-align:left;font-family:var(--fn);transition:background .12s}
+.sort-opt:hover{background:var(--sf2);color:var(--tx)}
+.sort-opt.active{color:var(--ac2)}
+.sort-opt .sck{margin-left:auto;font-size:12px;display:none}
+.sort-opt.active .sck{display:block}
+.sort-opt svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:.7}
 .lw{border-radius:var(--rr);overflow:hidden;border:1px solid var(--bd);width:100%}
 .tbl{width:100%;border-collapse:collapse}
 .tbl thead tr{background:var(--sf3)}
@@ -226,7 +242,34 @@ select option{background:#1c1c27}
 
   <!-- VAULT PANEL -->
   <div class="panel active" id="panel-vault">
-    <div style="padding:4px 0 2px"><div class="chips" id="chips"></div></div>
+    <!-- Filter chips + Sort button cùng hàng -->
+    <div class="filter-bar">
+      <div class="chips" id="chips"></div>
+      <div class="sort-wrap">
+        <button class="sort-btn" id="sort-btn" onclick="toggleSortMenu(event)">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+          <span id="sort-label">A&#8594;Z</span>
+        </button>
+        <div class="sort-menu" id="sort-menu">
+          <button class="sort-opt active" id="sopt-name_asc"  onclick="setSort('name_asc')">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="9" y2="18"/></svg>
+            <span data-i18n="sortNameAsc">Name A &#8594; Z</span><span class="sck">&#10003;</span>
+          </button>
+          <button class="sort-opt" id="sopt-name_desc" onclick="setSort('name_desc')">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><line x1="4" y1="6" x2="9" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            <span data-i18n="sortNameDesc">Name Z &#8594; A</span><span class="sck">&#10003;</span>
+          </button>
+          <button class="sort-opt" id="sopt-type_asc"  onclick="setSort('type_asc')">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span data-i18n="sortType">Category A &#8594; Z</span><span class="sck">&#10003;</span>
+          </button>
+          <button class="sort-opt" id="sopt-date" onclick="setSort('date')">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span data-i18n="sortDate">Date Added</span><span class="sck">&#10003;</span>
+          </button>
+        </div>
+      </div>
+    </div>
     <div id="acc-list">
       <div class="empty"><div class="ei">&#128274;</div><div class="et" data-i18n="loading">Loading vault...</div></div>
     </div>
@@ -378,6 +421,7 @@ var DERIVED_KEY  = null;  // CryptoKey từ PBKDF2, dùng cho dữ liệu mới
 var AUTH_TOKEN   = '';    // SHA-256(MASTER) — gửi kèm API để GAS xác thực
 var DATA = [], LANG = localStorage.getItem("mv_lang") || "en";
 var FILTER = "", SEARCH = "", EDIT_ID = null, IROWS = [], SRCH = false;
+var SORT = localStorage.getItem("mv_sort") || "name_asc"; // sort state
 var LOCK_TIMER = null, LOCK_DELAY = 5 * 60 * 1000;
 
 // ── Crypto constants ──
@@ -511,6 +555,14 @@ var STRINGS = {
     iprType:            "Type",
     andMore:            "... and {n} more",
     willImport:         "{n} accounts will be encrypted and saved.",
+    sortNameAsc:        "Name A \u2192 Z",
+    sortNameDesc:       "Name Z \u2192 A",
+    sortType:           "Category A \u2192 Z",
+    sortDate:           "Date Added",
+    sortBtnName:        "A\u2192Z",
+    sortBtnNameD:       "Z\u2192A",
+    sortBtnType:        "Cat",
+    sortBtnDate:        "Date",
   },
   vi: {
     lockTitle:          "Chào mừng trở lại",
@@ -632,6 +684,14 @@ var STRINGS = {
     iprType:            "Loại",
     andMore:            "... và {n} khác",
     willImport:         "Sẽ mã hóa và lưu {n} tài khoản.",
+    sortNameAsc:        "Tên A → Z",
+    sortNameDesc:       "Tên Z → A",
+    sortType:           "Phân loại A → Z",
+    sortDate:           "Ngày thêm",
+    sortBtnName:        "A→Z",
+    sortBtnNameD:       "Z→A",
+    sortBtnType:        "Loại",
+    sortBtnDate:        "Ngày",
   }
 };
 
@@ -656,7 +716,7 @@ function applyLang() {
     var el = document.getElementById(id); if (!el) return;
     el.classList.toggle("active", id.endsWith(LANG));
   });
-  if (MASTER_RAW) { buildChips(); renderList(); }
+  if (MASTER_RAW) { buildChips(); renderList(); } // renderList refreshes sort label too
   localStorage.setItem("mv_lang", LANG);
 }
 
@@ -761,6 +821,16 @@ async function computeAuthToken(password) {
 window.addEventListener('load', function() {
   FILTER = t("all");
   applyLang();
+  // Init sort button state on page load (before unlock)
+  var _sortBtn = document.getElementById("sort-btn");
+  var _sortLbl = document.getElementById("sort-label");
+  if (_sortBtn && _sortLbl) {
+    _sortLbl.textContent = SORT === "name_asc" ? "A→Z" : SORT === "name_desc" ? "Z→A" : SORT === "type_asc" ? "Cat" : "Date";
+    _sortBtn.classList.toggle("on", SORT !== "date");
+    ["name_asc","name_desc","type_asc","date"].forEach(function(k){
+      var el=document.getElementById("sopt-"+k); if(el) el.classList.toggle("active", k===SORT);
+    });
+  }
   if (window.PasswordCredential || window.FederatedCredential) {
     document.getElementById("lhint").classList.add("show");
   }
@@ -902,6 +972,64 @@ function buildChips() {
 function setFilter(f) { FILTER=f; buildChips(); renderList(); }
 function onSearch() { SEARCH=document.getElementById("srch").value.toLowerCase(); renderList(); }
 
+// ── SORT ──────────────────────────────────────────────────
+var SORT_LABELS = {
+  name_asc:  function(){ return t("sortBtnName"); },
+  name_desc: function(){ return t("sortBtnNameD"); },
+  type_asc:  function(){ return t("sortBtnType"); },
+  date:      function(){ return t("sortBtnDate"); }
+};
+
+function setSort(s) {
+  SORT = s;
+  localStorage.setItem("mv_sort", s);
+  // update active state on options
+  ["name_asc","name_desc","type_asc","date"].forEach(function(k) {
+    var el = document.getElementById("sopt-"+k);
+    if (el) el.classList.toggle("active", k === s);
+  });
+  // update button label & highlight
+  var lbl = document.getElementById("sort-label");
+  var btn = document.getElementById("sort-btn");
+  if (lbl) lbl.textContent = SORT_LABELS[s] ? SORT_LABELS[s]() : s;
+  if (btn) btn.classList.toggle("on", s !== "date");
+  closeSortMenu();
+  renderList();
+}
+
+function toggleSortMenu(e) {
+  if (e) e.stopPropagation();
+  var m = document.getElementById("sort-menu");
+  if (m) m.classList.toggle("open");
+}
+function closeSortMenu() {
+  var m = document.getElementById("sort-menu");
+  if (m) m.classList.remove("open");
+}
+// Click bên ngoài đóng menu sort
+document.addEventListener("click", function(e) {
+  var wrap = document.querySelector(".sort-wrap");
+  if (wrap && !wrap.contains(e.target)) closeSortMenu();
+});
+
+function sortFiltered(arr) {
+  var copy = arr.slice();
+  if (SORT === "name_asc") {
+    copy.sort(function(a,b){ return (a.service_name||"").localeCompare(b.service_name||""); });
+  } else if (SORT === "name_desc") {
+    copy.sort(function(a,b){ return (b.service_name||"").localeCompare(a.service_name||""); });
+  } else if (SORT === "type_asc") {
+    copy.sort(function(a,b){
+      var ta=(a.type||t("general")), tb=(b.type||t("general"));
+      var c=ta.localeCompare(tb);
+      if (c!==0) return c;
+      return (a.service_name||"").localeCompare(b.service_name||"");
+    });
+  }
+  // "date" = keep original server order
+  return copy;
+}
+
 function renderList() {
   var q=SEARCH, allLabel=t("all"), filtered=[];
   for (var i=0; i<DATA.length; i++) {
@@ -911,6 +1039,16 @@ function renderList() {
         (a.type||"").toLowerCase().indexOf(q)<0 && (a.url||"").toLowerCase().indexOf(q)<0) continue;
     filtered.push(a);
   }
+
+  // Sort
+  filtered = sortFiltered(filtered);
+
+  // Update sort button label (in case language changed)
+  var lbl = document.getElementById("sort-label");
+  var btn = document.getElementById("sort-btn");
+  if (lbl && SORT_LABELS[SORT]) lbl.textContent = SORT_LABELS[SORT]();
+  if (btn) btn.classList.toggle("on", SORT !== "date");
+
   var el = document.getElementById("acc-list");
   if (!filtered.length) {
     el.innerHTML='<div class="empty"><div class="ei">&#128274;</div><div class="et">'+
@@ -921,16 +1059,15 @@ function renderList() {
   var rows="";
   for (var j=0; j<filtered.length; j++) {
     var a=filtered[j], av="av"+(chCode(a.service_name)%10), ini=(a.service_name||"?")[0].toUpperCase();
-    rows+='<tr onclick="openDetail(\''+esc(a.id)+'\')">'+
-      '<td><div class="td-svc"><div class="av '+av+'">'+ini+'</div><span class="td-name">'+esc(a.service_name)+'</span></div></td>'+
-      '<td class="td-user">'+esc(a.username)+'</td>'+
-      '<td><span class="at">'+esc(a.type||t("general"))+'</span></td>'+
-      '<td class="td-action"><button onclick="event.stopPropagation();openDetail(\''+esc(a.id)+'\')" title="View">&#8250;</button></td>'+
+    rows+='<tr onclick="openDetail(\''+esc(a.id)+'\')">'+ 
+      '<td><div class="td-svc"><div class="av '+av+'">'+ini+'</div><span class="td-name">'+esc(a.service_name)+'</span></div></td>'+ 
+      '<td class="td-user">'+esc(a.username)+'</td>'+ 
+      '<td><span class="at">'+esc(a.type||t("general"))+'</span></td>'+ 
+      '<td class="td-action"><button onclick="event.stopPropagation();openDetail(\''+esc(a.id)+'\')" title="View">&#8250;</button></td>'+ 
       '</tr>';
   }
   el.innerHTML='<div class="lw"><table class="tbl"><thead><tr><th>'+t("colService")+'</th><th>'+t("colUser")+'</th><th>'+t("colCat")+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
-
 // ══════════════════════════════════════════════════════════
 // ENCRYPTION UPGRADE (v1 → v2)
 // ══════════════════════════════════════════════════════════
@@ -1307,6 +1444,9 @@ window.closeDrawer        = closeDrawer;
 window.doUpgradeEncryption= doUpgradeEncryption;
 window.dismissUpgrade     = dismissUpgrade;
 window.loadAccounts       = loadAccounts;
+window.setSort            = setSort;
+window.toggleSortMenu     = toggleSortMenu;
+window.closeSortMenu      = closeSortMenu;
 
 })(); // end IIFE
 </script>
