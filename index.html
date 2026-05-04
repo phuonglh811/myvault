@@ -93,8 +93,8 @@ select option{background:#1c1c27}
 .chip.active{background:var(--ac);border-color:var(--ac);color:#fff}
 /* ── SORT ── */
 .filter-bar{display:flex;align-items:flex-start;gap:8px;padding:4px 0 0}
-.filter-bar .chips{flex:1;padding-bottom:10px}
-.sort-wrap{flex-shrink:0;position:relative;padding-bottom:10px}
+.filter-bar .chips{flex:1;min-width:0;padding-bottom:10px}
+.sort-wrap{flex-shrink:0;position:relative;padding-bottom:10px;padding-left:8px;border-left:1px solid var(--bd);margin-left:2px}
 .sort-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);font-family:var(--fn);white-space:nowrap;transition:all .15s}
 .sort-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .sort-btn.on{border-color:var(--ac);color:var(--ac2);background:rgba(124,106,247,.1)}
