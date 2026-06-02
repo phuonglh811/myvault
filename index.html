@@ -49,22 +49,23 @@ body{font-family:var(--fn);font-size:15px;background:var(--bg);color:var(--tx);-
 .tsearch{flex:1;position:relative;display:none;align-items:center}
 .tsearch.show{display:flex}
 .tsearch svg{position:absolute;left:10px;width:15px;height:15px;stroke:var(--tx3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;flex-shrink:0}
-.tsearch input{width:100%;padding:8px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:14px;font-family:var(--fn);outline:none}
+.tsearch input{width:100%;padding:8px 12px 8px 36px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:16px;font-family:var(--fn);outline:none;-webkit-user-select:text;user-select:text;-webkit-appearance:none;touch-action:manipulation}
 .tsearch input:focus{border-color:var(--ac)}
 .tsearch input::placeholder{color:var(--tx3)}
+.srch-clear{position:absolute;right:8px;background:none;border:none;cursor:pointer;color:var(--tx3);font-size:16px;padding:4px 6px;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tbtns{display:flex;gap:6px;flex-shrink:0;align-items:center}
-.ib{width:34px;height:34px;border-radius:var(--rs);background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ib{width:34px;height:34px;border-radius:var(--rs);background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .ib svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .ib:hover{border-color:var(--bd2);color:var(--tx)}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;background:rgba(13,13,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--bd);display:flex;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
-.nb{flex:1;padding:9px 4px 7px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tx3)}
+.nb{flex:1;padding:9px 4px 7px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tx3);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .nb svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .nb span{font-size:10px;font-weight:500;font-family:var(--fn)}
 .nb.active{color:var(--ac2)}
 .panel{display:none;padding:0 0 0}
 #panel-add,#panel-import,#panel-settings{padding:14px 14px 0}
 .panel.active{display:block}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--fn);transition:opacity .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--fn);transition:opacity .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .btn:active{opacity:.75}
 .btn-p{background:var(--ac);color:#fff}
 .btn-g{background:var(--sf2);color:var(--tx2);border:1px solid var(--bd)}
@@ -75,7 +76,7 @@ body{font-family:var(--fn);font-size:15px;background:var(--bg);color:var(--tx);-
 .field{margin-bottom:14px}
 .field label{display:block;font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--tx3);margin-bottom:5px}
 .iw{position:relative}
-input[type=text],input[type=password],input[type=url],textarea,select{width:100%;padding:10px 13px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:14px;font-family:var(--fn);outline:none;-webkit-appearance:none}
+input[type=text],input[type=password],input[type=url],textarea,select{width:100%;padding:10px 13px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-size:16px;font-family:var(--fn);outline:none;-webkit-appearance:none;-webkit-user-select:text;user-select:text;touch-action:manipulation}
 input:focus,textarea:focus,select:focus{border-color:var(--ac);background:var(--sf3)}
 input::placeholder,textarea::placeholder{color:var(--tx3)}
 .ia{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx3);font-size:15px;padding:3px}
@@ -208,6 +209,8 @@ select option{background:#1c1c27}
     <div class="field iw iwa">
       <input type="password" id="master-input" name="password"
              autocomplete="current-password" required
+             readonly
+             onfocus="this.removeAttribute('readonly')"
              data-i18n-placeholder="masterPwPlaceholder">
       <button class="ia" onclick="toggleEye('master-input',this)" type="button">&#128065;</button>
     </div>
@@ -223,7 +226,9 @@ select option{background:#1c1c27}
   <div class="topbar">
     <div class="tlogo">My<span>Vault</span></div>
     <div class="tsearch" id="srchwrap">
-      <input type="text" id="srch" oninput="onSearch()" data-i18n-placeholder="searchPlaceholder">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      <input type="text" id="srch" oninput="onSearch()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="searchPlaceholder">
+      <button class="srch-clear" id="srch-clear" onclick="clearSearch()" type="button" style="display:none">&#10005;</button>
     </div>
     <div class="tbtns">
       <button class="ib" id="srch-btn" onclick="toggleSearch()" data-i18n-title="searchTitle">
@@ -908,8 +913,13 @@ function doLock() {
   clearTimeout(LOCK_TIMER);
   // Xóa sạch state nhạy cảm khỏi bộ nhớ
   MASTER_RAW = ''; DERIVED_KEY = null; AUTH_TOKEN = '';
-  DATA = []; SEARCH = ''; FILTER = t("all");
+  DATA = []; SEARCH = ''; FILTER = t("all"); SRCH = false;
   document.getElementById("master-input").value = "";
+  // Reset search UI
+  var srchEl = document.getElementById("srch");
+  if (srchEl) srchEl.value = "";
+  var clearBtn = document.getElementById("srch-clear");
+  if (clearBtn) clearBtn.style.display = "none";
   document.getElementById("app").style.display = "none";
   document.getElementById("lock-screen").style.display = "flex";
   closeDrawer();
@@ -927,16 +937,41 @@ function showPanel(n) {
   document.getElementById("panel-"+n).classList.add("active");
   var nb = document.getElementById("nav-"+n); if (nb) nb.classList.add("active");
   var sw = document.getElementById("srchwrap");
-  if (n === "vault") { sw.classList.add("show"); document.getElementById("srch-btn").style.display="none"; renderList(); }
-  else { sw.classList.remove("show"); document.getElementById("srch-btn").style.display="flex"; }
+  if (n === "vault") {
+    sw.classList.add("show");
+    document.getElementById("srch-btn").style.display="none";
+    renderList();
+  } else {
+    // Clear search state khi chuyển tab - tránh bị kẹt ở empty state
+    SEARCH = "";
+    SRCH = false;
+    var srchEl = document.getElementById("srch");
+    if (srchEl) srchEl.value = "";
+    var clearBtn = document.getElementById("srch-clear");
+    if (clearBtn) clearBtn.style.display = "none";
+    sw.classList.remove("show");
+    document.getElementById("srch-btn").style.display="flex";
+  }
   if (n === "settings") { document.getElementById("stat-n").textContent = DATA.length; updateEncStatusUI(); }
 }
 function toggleSearch() {
   SRCH = !SRCH;
   var sw = document.getElementById("srchwrap");
   sw.classList.toggle("show", SRCH);
-  if (SRCH) sw.querySelector("input").focus();
-  else { document.getElementById("srch").value=""; SEARCH=""; renderList(); }
+  if (SRCH) {
+    // Delay focus trên mobile để keyboard mở đúng
+    setTimeout(function(){ sw.querySelector("input").focus(); }, 100);
+  } else {
+    clearSearch();
+  }
+}
+function clearSearch() {
+  var srchEl = document.getElementById("srch");
+  if (srchEl) srchEl.value = "";
+  SEARCH = "";
+  var clearBtn = document.getElementById("srch-clear");
+  if (clearBtn) clearBtn.style.display = "none";
+  renderList();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -977,7 +1012,12 @@ function buildChips() {
 }
 
 function setFilter(f) { FILTER=f; buildChips(); renderList(); }
-function onSearch() { SEARCH=document.getElementById("srch").value.toLowerCase(); renderList(); }
+function onSearch() {
+  SEARCH = document.getElementById("srch").value.toLowerCase();
+  var clearBtn = document.getElementById("srch-clear");
+  if (clearBtn) clearBtn.style.display = SEARCH ? "block" : "none";
+  renderList();
+}
 
 // ── SORT ──────────────────────────────────────────────────
 var SORT_LABELS = {
@@ -1420,6 +1460,7 @@ function chCode(s){var n=0;s=s||"";for(var i=0;i<s.length;i++)n+=s.charCodeAt(i)
 // ══════════════════════════════════════════════════════════
 // EXPOSE to window (cần cho onclick="..." trong HTML)
 // ══════════════════════════════════════════════════════════
+window.clearSearch          = clearSearch;
 window.doUnlock           = doUnlock;
 window.doLock             = doLock;
 window.showPanel          = showPanel;
