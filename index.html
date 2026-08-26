@@ -837,7 +837,7 @@ async function unwrapRawKey(wrapped,wrappingKey){
   var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToU8(wrapped.iv)},wrappingKey,b64ToU8(wrapped.ct));
   return new Uint8Array(pt);
 }
-async function importVaultKey(raw){return crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},false,['encrypt','decrypt']);}
+async function importVaultKey(raw){return crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},true,['encrypt','decrypt']);}
 async function deriveRecordKey(vaultRaw,salt){
   var base=await crypto.subtle.importKey('raw',vaultRaw,'HKDF',false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:salt,info:new TextEncoder().encode('MyVault record v3')},
