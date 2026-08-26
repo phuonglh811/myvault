@@ -955,13 +955,14 @@ async function setupPasskey(){
   if(!UNLOCKED||!VAULT_KEY)return;
   if(DATA.length && !isUpgraded()){
     if(!confirm(LANG==='vi'?'Cần nâng cấp dữ liệu cũ lên v3 trước khi bật Passkey. Tiếp tục?':'Legacy records must be migrated to v3 before enabling Passkey. Continue?')) return;
-    await migrateAllToV3();
+    try{await migrateAllToV3();localStorage.setItem(UPGRADED_KEY,'done');}catch(e){toast((LANG==='vi'?'Nâng cấp thất bại: ':'Upgrade failed: ')+e.message);return;}
   }
   if(!webauthnSupported()){toast(t("passkeyNeedHttps"));return;}
   META.passkey=META.passkey||{prfSalt:u8ToB64(randomU8(32))};
   var salt=b64ToU8(META.passkey.prfSalt);
   try{
     var begin=await apiGet({action:'beginPasskeyRegistration'});
+    if(!begin||begin.success===false)throw new Error(begin&&begin.error||'Registration unavailable');
     var opts=normalizeCreationOptions(begin.publicKey||begin);
     opts.extensions=opts.extensions||{};opts.extensions.prf={eval:{first:salt}};
     opts.authenticatorSelection=opts.authenticatorSelection||{};opts.authenticatorSelection.userVerification='required';
@@ -969,14 +970,16 @@ async function setupPasskey(){
     var prf=getPrfResult(cred.getClientExtensionResults());
     if(!prf){toast(t("passkeyUnsupported"));return;}
     var wrapKey=await hkdfFromPrf(prf,salt),raw=new Uint8Array(await crypto.subtle.exportKey('raw',VAULT_KEY));
-    META.passkey.credentialId=cred.id;META.passkey.wrap=await wrapRawKey(raw,wrapKey);
-    var fin=await apiPostRaw({action:'finishPasskeyRegistration',credential:credentialJSON(cred)});
-    if(!fin||!fin.success){toast(t("passkeySetupFail"));return;}
+    var fin=await apiPostRaw({action:'finishPasskeyRegistration',_session:SESSION_TOKEN,credential:credentialJSON(cred)});
+    if(!fin||!fin.success||!fin.sessionSecret){toast(t("passkeySetupFail"));return;}
+    META.passkey.credentialId=cred.id;
+    META.passkey.wrap=await wrapRawKey(raw,wrapKey);
+    META.passkey.sessionWrap=await wrapRawKey(new TextEncoder().encode(fin.sessionSecret),wrapKey);
     writeMeta();updateSecurityStatus();toast(t("passkeySetupDone"));
   }catch(e){console.error(e);toast(t("passkeySetupFail")+': '+e.message);}
 }
 async function unlockWithPasskey(){
-  if(!META||!META.passkey||!META.passkey.credentialId)return;
+  if(!META||!META.passkey||!META.passkey.credentialId||!META.passkey.sessionWrap)return;
   if(!webauthnSupported()){toast(t("passkeyNeedHttps"));return;}
   try{
     var begin=await apiGet({action:'beginPasskeyLogin'}),opts=normalizeRequestOptions(begin.publicKey||begin);
@@ -985,16 +988,21 @@ async function unlockWithPasskey(){
     opts.extensions.prf.evalByCredential[META.passkey.credentialId]={first:b64ToU8(META.passkey.prfSalt)};
     var cred=await navigator.credentials.get({publicKey:opts}),prf=getPrfResult(cred.getClientExtensionResults());
     if(!prf)throw new Error('PRF unavailable');
-    var wrapKey=await hkdfFromPrf(prf,b64ToU8(META.passkey.prfSalt)),raw=await unwrapRawKey(META.passkey.wrap,wrapKey);
+    var wrapKey=await hkdfFromPrf(prf,b64ToU8(META.passkey.prfSalt));
+    var raw=await unwrapRawKey(META.passkey.wrap,wrapKey);
+    var sessionSecret=new TextDecoder().decode(await unwrapRawKey(META.passkey.sessionWrap,wrapKey));
     VAULT_KEY=await importVaultKey(raw);
-    var fin=await apiPostRaw({action:'finishPasskeyLogin',credential:credentialJSON(cred)});
-    if(!fin||!fin.sessionToken)throw new Error('No server session');
+    var fin=await apiPostRaw({action:'finishPasskeyLogin',credential:credentialJSON(cred),sessionSecret:sessionSecret});
+    if(!fin||!fin.sessionToken)throw new Error(fin&&fin.error||'No server session');
     SESSION_TOKEN=fin.sessionToken;await finishUnlock();
   }catch(e){console.error(e);document.getElementById("lerr").style.display="block";document.getElementById("lerr").textContent=t("sessionFail");}
 }
 async function createPasswordSession(){
-  var r=await apiPostRaw({action:'createSession',proofType:'password',proof:AUTH_TOKEN});
-  if(!r||!r.sessionToken)throw new Error('No session token');SESSION_TOKEN=r.sessionToken;AUTH_TOKEN='';
+  var ch=await apiGet({action:'getSessionChallenge'});
+  if(!ch||!ch.challenge)throw new Error('No authentication challenge');
+  var response=await sha256Hex(AUTH_TOKEN+':'+ch.challenge);
+  var r=await apiPostRaw({action:'createSession',proofType:'password',proof:AUTH_TOKEN,challenge:ch.challenge,response:response});
+  if(!r||!r.sessionToken)throw new Error(r&&r.error||'No session token');SESSION_TOKEN=r.sessionToken;AUTH_TOKEN='';
 }
 async function finishUnlock(){
   UNLOCKED=true;FILTER=t("all");USER_TYPED=false;
@@ -1048,11 +1056,12 @@ function updateSecurityStatus(){
 async function migrateAllToV3(){
   var changed=0;
   for(var i=0;i<DATA.length;i++){
-    var a=DATA[i],d=await apiGet({action:'getCiphertext',id:a.id});if(!d)continue;
+    var a=DATA[i],d=await apiGet({action:'getCiphertext',id:a.id});if(!d)throw new Error('Cannot read record: '+a.service_name);
     if((d.password_encrypted||'').startsWith('v3:')&&(!d.notes_encrypted||d.notes_encrypted.startsWith('v3:')))continue;
     var pw=await decryptData(d.password_encrypted),note=d.notes_encrypted?await decryptData(d.notes_encrypted):'';
-    if(!pw)continue;
-    await apiPost({action:'updateAccount',payload:{id:a.id,password_encrypted:await encryptData(pw),notes_encrypted:note?await encryptData(note):''}});
+    if(!pw)throw new Error('Cannot decrypt record: '+a.service_name);
+    var r=await apiPost({action:'updateAccount',payload:{id:a.id,password_encrypted:await encryptData(pw),notes_encrypted:note?await encryptData(note):''}});
+    if(!r||!r.success)throw new Error('Cannot save migrated record: '+a.service_name);
     changed++;
   }
   localStorage.setItem(UPGRADED_KEY,'done');return changed;
@@ -1107,7 +1116,7 @@ async function doUnlock(){
   }finally{btn.disabled=false;btn.innerHTML=t("unlockBtn");}
 }
 function doLock(){
-  clearTimeout(LOCK_TIMER);MASTER_RAW='';LEGACY_KEY=null;VAULT_KEY=null;SESSION_TOKEN='';AUTH_TOKEN='';
+  clearTimeout(LOCK_TIMER);var oldSession=SESSION_TOKEN;if(oldSession)apiPostRaw({action:'logout',_session:oldSession}).catch(function(){});MASTER_RAW='';LEGACY_KEY=null;VAULT_KEY=null;SESSION_TOKEN='';AUTH_TOKEN='';
   DATA=[];SEARCH='';FILTER=t("all");SRCH=false;UNLOCKED=false;USER_TYPED=false;
   var mi=document.getElementById("master-input");if(mi)mi.value="";
   var sr=document.getElementById("srch");if(sr)sr.value="";
@@ -1319,10 +1328,12 @@ function checkUpgradeNeeded(){
   banner.innerHTML='<span>&#128274; Legacy records can be migrated to v3 (random per-record salt + IV).</span><button class="btn btn-p btn-sm" onclick="doUpgradeEncryption()">Upgrade</button><button class="btn btn-g btn-sm" onclick="dismissUpgrade()">Later</button>';
   document.getElementById("panel-vault").insertBefore(banner,document.getElementById("acc-list"));
 }
-function dismissUpgrade(){localStorage.setItem(UPGRADED_KEY,'done');var b=document.getElementById("upgrade-banner");if(b)b.remove();updateEncStatusUI();}
+function dismissUpgrade(){var b=document.getElementById("upgrade-banner");if(b)b.remove();updateEncStatusUI();}
 async function doUpgradeEncryption(){
-  if(!DATA.length){dismissUpgrade();return;}var b=document.getElementById("upgrade-banner"),n=await migrateAllToV3();if(b)b.remove();
-  localStorage.setItem(UPGRADED_KEY,'done');toast("Migrated "+n+" record(s) to v3");updateEncStatusUI();
+  if(!DATA.length){localStorage.setItem(UPGRADED_KEY,'done');var b0=document.getElementById('upgrade-banner');if(b0)b0.remove();updateEncStatusUI();return;}
+  var b=document.getElementById("upgrade-banner");
+  try{var n=await migrateAllToV3();if(b)b.remove();toast("Migrated "+n+" record(s) to v3");updateEncStatusUI();}
+  catch(e){toast((LANG==='vi'?'Nâng cấp thất bại: ':'Upgrade failed: ')+e.message);updateEncStatusUI();}
 }
 
 // DETAIL DRAWER
@@ -1528,25 +1539,24 @@ function showChangePw(){
 async function doChangePw(){
   var oldPw=document.getElementById("cp-old").value,newPw=document.getElementById("cp-new").value,conf=document.getElementById("cp-conf").value;
   if(!oldPw){toast(t("currentPwWrong"));return;}
-  if(!newPw||passwordScore(newPw)<5){toast(t("pwWeak"));return;}
+  if(passwordScore(newPw)<5){toast(t("pwWeak"));return;}
   if(newPw!==conf){toast(t("pwMismatch"));return;}
   var breach=await checkPwnedPassword(newPw);if(breach.pwned){toast(t("pwPwned"));return;}
   var btn=document.querySelector("#dbody .btn-p");if(btn){btn.disabled=true;btn.textContent=t("reEncrypting",{n:1,total:1});}
   try{
-    // Verify the current password by unwrapping the existing vault key.
     var oldKey=await derivePasswordKey(oldPw,b64ToU8(META.salt));
-    var raw=await unwrapRawKey(META.passwordWrap,oldKey);
-    var verifiedVaultKey=await importVaultKey(raw);
-    var currentRaw=new Uint8Array(await crypto.subtle.exportKey("raw",VAULT_KEY));
-    if(u8ToHex(raw)!==u8ToHex(currentRaw)) throw new Error("Current password incorrect");
+    var oldRaw=await unwrapRawKey(META.passwordWrap,oldKey);
+    var currentRaw=new Uint8Array(await crypto.subtle.exportKey('raw',VAULT_KEY));
+    if(u8ToHex(oldRaw)!==u8ToHex(currentRaw))throw new Error('Current password incorrect');
+    var newProof=await computeAuthToken(newPw);
+    var server=await apiPost({action:'changeBootstrapProof',newProof:newProof});
+    if(!server||!server.success)throw new Error(server&&server.error||'Could not update server password proof');
     await changePasswordWrap(newPw);
     MASTER_RAW='';LEGACY_KEY=null;
     toast(t("doneReEncrypt",{n:DATA.length}));closeDrawer();updateSecurityStatus();
-  }catch(e){
-    toast(e.message==="Current password incorrect"?t("currentPwWrong"):t("saveFailed")+": "+e.message);
-  }finally{if(btn){btn.disabled=false;btn.textContent=t("changePwBtn");}}
+  }catch(e){toast(e.message==='Current password incorrect'?t("currentPwWrong"):t("saveFailed")+': '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.textContent=t("changePwBtn");}}
 }
-
 // DRAWER / UTILS
 
 // ══════════════════════════════════════════════════════════
