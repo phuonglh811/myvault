@@ -196,10 +196,9 @@ select option{background:#1c1c27}
   </div>
   <div class="ltitle" data-i18n="lockTitle">Welcome back</div>
   <div class="lsub"   data-i18n="lockSub">Enter your Master Password to<br>decrypt and access your vault.</div>
-  <!-- Nút mở khóa sinh trắc học — chỉ hiện nếu thiết bị này đã thiết lập trước đó -->
-  <div class="lform" id="bio-unlock-wrap" style="display:none;margin-bottom:14px">
-    <button type="button" class="btn btn-p btn-full" id="bio-unlock-btn" onclick="biometricUnlock()" data-i18n="bioUnlockBtn">&#128272; Unlock with Face ID / Touch ID</button>
-    <div style="text-align:center;color:var(--tx3);font-size:12px;margin-top:14px;text-transform:uppercase;letter-spacing:.5px" data-i18n="bioOr">or</div>
+  <div class="lhint" id="lhint">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span data-i18n="lockHint">Tap the key icon in your browser to use Face ID / Touch ID</span>
   </div>
   <!--
     FORM CHUẨN → trình duyệt nhận diện và gợi ý lưu password
@@ -213,6 +212,7 @@ select option{background:#1c1c27}
       <button class="ia" onclick="toggleEye('master-input',this)" type="button">&#128065;</button>
     </div>
     <button type="submit" class="btn btn-p btn-full" id="unlock-btn" data-i18n="unlockBtn">&#128274; Unlock Vault</button>
+    <button type="button" class="btn btn-g btn-full" id="passkey-btn" onclick="unlockWithPasskey()" style="margin-top:8px;display:none" data-i18n="passkeyUnlock">&#128273; Unlock with Face ID / Touch ID</button>
     <div id="lerr" class="lerr" data-i18n="unlockErr">Incorrect password or data error</div>
   </form>
 </div>
@@ -337,7 +337,7 @@ select option{background:#1c1c27}
   <div class="panel" id="panel-settings">
     <div class="stats" style="margin-bottom:18px">
       <div class="sc"><div class="sn" id="stat-n">0</div><div class="sl" data-i18n="statAccounts">Accounts</div></div>
-      <div class="sc"><div class="sn" style="font-size:13px;padding-top:6px" id="stat-enc">PBKDF2</div><div class="sl" data-i18n="statEnc">Encryption</div></div>
+      <div class="sc"><div class="sn" style="font-size:13px;padding-top:6px" id="stat-enc">PBKDF2/HKDF</div><div class="sl" data-i18n="statEnc">Encryption</div></div>
       <div class="sc"><div class="sn" style="font-size:14px;padding-top:5px;color:var(--gn)">E2E</div><div class="sl" data-i18n="statZk">Zero-Knowledge</div></div>
     </div>
     <div class="sg">
@@ -364,19 +364,19 @@ select option{background:#1c1c27}
             <div><div class="stit" data-i18n="encStatusTitle">Encryption Upgrade</div><div class="shit" id="enc-status-hint" data-i18n="encStatusSub">Checking...</div></div></div>
           <div class="sir" id="enc-status-icon">&#8250;</div>
         </div>
-        <div class="si" onclick="rotateSalt()">
-          <div class="sil"><div class="sico" style="background:rgba(52,211,153,.12)"><svg stroke="#34d399" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></div>
-            <div><div class="stit" data-i18n="saltStatusTitle">Encryption Salt</div><div class="shit" id="salt-status-hint" data-i18n="saltStatusLegacy">Checking...</div></div></div>
-          <div class="sir" id="salt-status-icon">&#8250;</div>
+        <div class="si" onclick="setupPasskey()">
+          <div class="sil"><div class="sico" style="background:rgba(124,106,247,.12)"><svg stroke="#a598ff" viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-7 7v2a7 7 0 0 0 14 0v-2a7 7 0 0 0-7-7z"/><circle cx="12" cy="10" r="2"/></svg></div>
+            <div><div class="stit" data-i18n="passkeyTitle">Passkey / Face ID / Touch ID</div><div class="shit" data-i18n="passkeySub">Passwordless unlock on this device</div></div></div>
+          <div class="sir" id="passkey-status">›</div>
         </div>
-        <div class="si" onclick="toggleBiometric()">
-          <div class="sil"><div class="sico" style="background:rgba(124,106,247,.12)"><svg stroke="#a598ff" viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 10v2a6 6 0 0 0 12 0v-2"/><path d="M12 18v3"/><path d="M9 21h6"/></svg></div>
-            <div><div class="stit" data-i18n="bioSetupTitle">Biometric Quick Unlock</div><div class="shit" id="bio-status-hint" data-i18n="bioSetupSubOff">Not set up on this device</div></div></div>
-          <div class="sir" id="bio-status-icon">&#8250;</div>
+        <div class="si" onclick="setupTotp()">
+          <div class="sil"><div class="sico" style="background:rgba(52,211,153,.12)"><svg stroke="#34d399" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div><div class="stit" data-i18n="totpTitle">Vault 2FA (TOTP)</div><div class="shit" data-i18n="totpSub">Extra code required after unlock</div></div></div>
+          <div class="sir" id="totp-status">›</div>
         </div>
         <div class="si" onclick="showChangePw()">
           <div class="sil"><div class="sico" style="background:rgba(251,191,36,.12)"><svg stroke="#fbbf24" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-            <div><div class="stit" data-i18n="changePwTitle">Change Master Password</div><div class="shit" data-i18n="changePwSub">Re-encrypts all data</div></div></div>
+            <div><div class="stit" data-i18n="changePwTitle">Change Master Password</div><div class="shit" data-i18n="changePwSub">Re-wraps the vault key</div></div></div>
           <div class="sir">&#8250;</div>
         </div>
         <div class="si" onclick="doLock()">
@@ -386,6 +386,7 @@ select option{background:#1c1c27}
         </div>
       </div>
     </div>
+    <div class="ibox" style="margin-bottom:13px"><strong>v3 security:</strong> random per-vault salt, random per-record salt + IV, HKDF + AES-GCM, short-lived server sessions, WebAuthn Passkey PRF, TOTP, auto-lock on backgrounding, password-strength/duplicate checks and HIBP k-anonymity.</div>
     <div class="sg">
       <div class="sgl" data-i18n="sgInstall">Install as App</div>
       <div class="ibox" style="margin-bottom:0" data-i18n="installNote">
@@ -436,25 +437,24 @@ var GAS_URL = "https://script.google.com/macros/s/AKfycby8f_Y2bBuUJdLNVjs9dd-U1m
 // ══════════════════════════════════════════════════════════
 // STATE — tất cả private, MASTER không truy cập được từ console
 // ══════════════════════════════════════════════════════════
-var MASTER_RAW   = '';    // raw password, chỉ dùng để giải mã dữ liệu cũ
-var DERIVED_KEY  = null;  // CryptoKey từ PBKDF2, dùng cho dữ liệu mới
-var SESSION_TOKEN = '';   // Token ngẫu nhiên do server cấp sau khi login thành công.
-                           // KHÔNG suy ra được mật khẩu (khác AUTH_TOKEN cũ = SHA256(password)).
-                           // Có hạn dùng (server tự hết hạn), gửi kèm mọi request thay cho mật khẩu.
-var DATA = [], LANG = localStorage.getItem("mv_lang") || "en";
-var FILTER = "", SEARCH = "", EDIT_ID = null, IROWS = [], SRCH = false;
-var SORT = localStorage.getItem("mv_sort") || "name_asc"; // sort state
-var LOCK_TIMER = null, LOCK_DELAY = 5 * 60 * 1000;
-
-// ── Crypto constants ──
-// SALT_HEX: salt ngẫu nhiên (16 bytes), sinh ra 1 lần duy nhất và lưu trên
-// server (action getSalt/setSalt) để đồng bộ đa thiết bị — KHÔNG còn hard-code
-// trong mã nguồn công khai như trước (đó là lỗ hổng: ai xem code trên GitHub
-// cũng biết salt). Cache cục bộ trong localStorage chỉ để dùng tạm khi mất mạng.
-var SALT_HEX     = null;
-var SALT_CACHE_KEY = 'mv_salt_cache';
-var UPGRADED_KEY = 'mv_enc_v2';     // flag: đã nâng cấp lên v2 chưa
-var KDF_ITER     = 100000;          // số vòng PBKDF2 (Web Crypto native → rất nhanh)
+var MASTER_RAW = '';
+  var LEGACY_KEY = null;
+  var VAULT_KEY = null;
+  var SESSION_TOKEN = '';
+  var AUTH_TOKEN = ''; // one-time bootstrap proof only
+  var DATA = [], LANG = localStorage.getItem("mv_lang") || "en";
+  var FILTER = "", SEARCH = "", EDIT_ID = null, IROWS = [], SRCH = false;
+  var SORT = localStorage.getItem("mv_sort") || "name_asc";
+  var LOCK_TIMER = null, LOCK_DELAY = 5 * 60 * 1000;
+  var UNLOCKED = false;
+  var META_KEY = 'mv_v3_meta';
+  var VAULT_VERSION = 3;
+  var KDF_ITER = 600000;
+  var LEGACY_FIXED_SALT = 'myvault_personal_salt_2026_unique';
+  var UPGRADED_KEY = 'mv_enc_v3';
+  var PASSKEY_RP_NAME = 'MyVault';
+  var PASSKEY_RP_ID = location.hostname;
+  var HIBP_URL = 'https://api.pwnedpasswords.com/range/';
 
 // ══════════════════════════════════════════════════════════
 // I18N
@@ -463,7 +463,32 @@ var STRINGS = {
   en: {
     lockTitle:          "Welcome back",
     lockSub:            "Enter your Master Password to<br>decrypt and access your vault.",
-    lockHint:           "Tap the key icon in your browser to use Face ID / Touch ID",
+    lockHint:           "Use Face ID / Touch ID with a passkey when available.",
+    passkeyUnlock:      "&#128273; Unlock with Face ID / Touch ID",
+    passkeyTitle:       "Passkey / Face ID / Touch ID",
+    passkeySub:         "Passwordless unlock on this device",
+    passkeyReady:       "Passkey enabled ✓",
+    passkeyNotReady:    "Not configured",
+    totpTitle:          "Vault 2FA (TOTP)",
+    totpSub:            "Extra code required after unlock",
+    totpReady:          "TOTP enabled ✓",
+    totpNotReady:       "Not configured",
+    totpSetupTitle:     "Set up Vault 2FA",
+    totpSecret:         "Add this secret to your authenticator app:",
+    totpCode:           "Current 6-digit code",
+    totpPrompt:         "Enter your 6-digit Vault 2FA code:",
+    totpBad:            "Invalid TOTP code",
+    totpEnabled:        "Vault 2FA enabled",
+    totpDisabled:       "Vault 2FA disabled",
+    passkeyNeedHttps:   "Passkeys require HTTPS (or localhost).",
+    passkeyUnsupported: "This browser/device does not support the required Passkey PRF feature.",
+    passkeySetupDone:   "Passkey enabled. Your Master Password is no longer needed on this device.",
+    passkeySetupFail:   "Passkey setup failed.",
+    sessionFail:        "Secure session could not be created. Update the GAS backend first.",
+    pwWeak:             "Password is too weak. Use at least 12 characters with upper/lowercase, number and symbol.",
+    pwPwned:            "Warning: this password has appeared in known data breaches. Choose another one.",
+    pwDuplicate:        "Warning: this password is already used by another account.",
+    breachCheckFail:    "Breach check unavailable; password was not blocked.",
     masterPwPlaceholder:"Master Password",
     unlockBtn:          "&#128274; Unlock Vault",
     unlocking:          "&#9203; Securing key...",
@@ -514,7 +539,7 @@ var STRINGS = {
     upgradeBtn:         "Upgrade",
     upgradeDone:        "&#10003; All records upgraded to PBKDF2!",
     changePwTitle:      "Change Master Password",
-    changePwSub:        "Re-encrypts all data",
+    changePwSub:        "Re-wraps the vault key",
     lockVaultTitle:     "Lock Vault",
     lockVaultSub:       "Clears memory, back to lock screen",
     sgInstall:          "Install as App",
@@ -588,38 +613,36 @@ var STRINGS = {
     sortBtnNameD:       "Z\u2192A",
     sortBtnType:        "Cat",
     sortBtnDate:        "Date",
-    bioUnlockBtn:       "&#128272; Unlock with Face ID / Touch ID",
-    bioOr:              "or",
-    bioUsePassword:     "Use Master Password instead",
-    bioSetupTitle:      "Biometric Quick Unlock",
-    bioSetupSub:        "Set up once. Enabled",
-    bioSetupSubOff:      "Not set up on this device",
-    bioSetupSubOn:      "Enabled on this device",
-    bioEnableBtn:       "Enable",
-    bioDisableBtn:      "Disable",
-    bioNotSupported:    "This browser/device doesn't support biometric unlock",
-    bioNeedUnlock:      "Please unlock with your Master Password first",
-    bioPrfUnsupported:  "This device's biometrics can't be used for encryption (PRF not supported). Falling back to password.",
-    bioSetupFailed:     "Could not set up biometric unlock",
-    bioUnlockFailed:    "Biometric unlock failed, please use your password",
-    bioEnabled:         "Biometric quick unlock enabled on this device",
-    bioDisabled:        "Biometric quick unlock disabled on this device",
-    bioConfirmDisable:  "Turn off Face ID / Touch ID quick unlock on this device? You can still use your Master Password.",
-    saltInit:           "Setting up encryption...",
-    sessionExpired:     "Session expired, please unlock again",
-    saltStatusTitle:    "Encryption Salt",
-    saltStatusLegacy:   "Using legacy shared salt — tap to migrate to a unique random salt",
-    saltStatusRandom:   "Using a unique random salt ✓",
-    saltRotateBtn:      "Migrate",
-    saltRotateConfirm:  "This will re-encrypt all data with a new unique random salt. Make sure you have a backup before continuing. Continue?",
-    saltRotating:       "Migrating {n}/{total}...",
-    saltRotateDone:     "Done — encryption now uses a unique random salt",
-    saltRotateFailed:   "Migration failed, your data is unchanged. Please try again",
   },
   vi: {
     lockTitle:          "Chào mừng trở lại",
     lockSub:            "Nhập Mật khẩu Master để<br>giải mã và truy cập kho của bạn.",
-    lockHint:           "Nhấn vào biểu tượng chìa khóa trên trình duyệt để dùng Face ID / Touch ID",
+    lockHint:           "Dùng Face ID / Touch ID với passkey khi thiết bị hỗ trợ.",
+    passkeyUnlock:      "&#128273; Mở khóa bằng Face ID / Touch ID",
+    passkeyTitle:       "Passkey / Face ID / Touch ID",
+    passkeySub:         "Mở khóa không cần mật khẩu trên thiết bị này",
+    passkeyReady:       "Đã bật Passkey ✓",
+    passkeyNotReady:    "Chưa thiết lập",
+    totpTitle:          "2FA cho Vault (TOTP)",
+    totpSub:            "Yêu cầu mã bổ sung sau khi mở khóa",
+    totpReady:          "Đã bật TOTP ✓",
+    totpNotReady:       "Chưa thiết lập",
+    totpSetupTitle:     "Thiết lập 2FA cho Vault",
+    totpSecret:         "Thêm mã bí mật này vào ứng dụng Authenticator:",
+    totpCode:           "Mã 6 số hiện tại",
+    totpPrompt:         "Nhập mã 6 số 2FA của Vault:",
+    totpBad:             "Mã TOTP không đúng",
+    totpEnabled:         "Đã bật 2FA cho Vault",
+    totpDisabled:        "Đã tắt 2FA cho Vault",
+    passkeyNeedHttps:   "Passkey yêu cầu HTTPS (hoặc localhost).",
+    passkeyUnsupported: "Trình duyệt/thiết bị không hỗ trợ Passkey PRF cần thiết.",
+    passkeySetupDone:   "Đã bật Passkey. Thiết bị này không cần nhập Master Password nữa.",
+    passkeySetupFail:   "Thiết lập Passkey thất bại.",
+    sessionFail:        "Không tạo được session bảo mật. Cần cập nhật GAS backend trước.",
+    pwWeak:             "Mật khẩu quá yếu. Hãy dùng ít nhất 12 ký tự gồm chữ hoa/chữ thường/số/ký hiệu.",
+    pwPwned:            "Cảnh báo: mật khẩu này đã xuất hiện trong các vụ rò rỉ dữ liệu. Hãy chọn mật khẩu khác.",
+    pwDuplicate:        "Cảnh báo: mật khẩu này đã được dùng cho tài khoản khác.",
+    breachCheckFail:    "Không kiểm tra được breach; mật khẩu không bị chặn.",
     masterPwPlaceholder:"Mật khẩu Master",
     unlockBtn:          "&#128274; Mở khóa Kho",
     unlocking:          "&#9203; Đang tạo khóa bảo mật...",
@@ -670,7 +693,7 @@ var STRINGS = {
     upgradeBtn:         "Nâng cấp",
     upgradeDone:        "&#10003; Đã nâng cấp toàn bộ lên PBKDF2!",
     changePwTitle:      "Đổi Mật khẩu Master",
-    changePwSub:        "Mã hóa lại toàn bộ dữ liệu",
+    changePwSub:        "Đổi lớp bảo vệ của vault key",
     lockVaultTitle:     "Khóa Kho",
     lockVaultSub:       "Xóa bộ nhớ, quay về màn hình khóa",
     sgInstall:          "Cài đặt như ứng dụng",
@@ -744,33 +767,6 @@ var STRINGS = {
     sortBtnNameD:       "Z→A",
     sortBtnType:        "Loại",
     sortBtnDate:        "Ngày",
-    bioUnlockBtn:       "&#128272; Mở khóa bằng Face ID / Vân tay",
-    bioOr:              "hoặc",
-    bioUsePassword:     "Dùng Mật khẩu Master",
-    bioSetupTitle:      "Mở khóa nhanh bằng sinh trắc học",
-    bioSetupSub:        "Thiết lập một lần.",
-    bioSetupSubOff:      "Chưa thiết lập trên thiết bị này",
-    bioSetupSubOn:      "Đã bật trên thiết bị này",
-    bioEnableBtn:       "Bật",
-    bioDisableBtn:      "Tắt",
-    bioNotSupported:    "Trình duyệt/thiết bị này không hỗ trợ mở khóa sinh trắc học",
-    bioNeedUnlock:      "Vui lòng mở khóa bằng Mật khẩu Master trước",
-    bioPrfUnsupported:  "Cảm biến sinh trắc học của thiết bị này không hỗ trợ mã hóa (thiếu PRF). Vui lòng dùng mật khẩu.",
-    bioSetupFailed:     "Không thể thiết lập mở khóa sinh trắc học",
-    bioUnlockFailed:    "Mở khóa sinh trắc học thất bại, vui lòng dùng mật khẩu",
-    bioEnabled:         "Đã bật mở khóa sinh trắc học trên thiết bị này",
-    bioDisabled:        "Đã tắt mở khóa sinh trắc học trên thiết bị này",
-    bioConfirmDisable:  "Tắt mở khóa nhanh Face ID / Vân tay trên thiết bị này? Bạn vẫn dùng được Mật khẩu Master.",
-    saltInit:           "Đang thiết lập mã hóa...",
-    sessionExpired:     "Phiên đã hết hạn, vui lòng mở khóa lại",
-    saltStatusTitle:    "Salt Mã Hóa",
-    saltStatusLegacy:   "Đang dùng salt cũ dùng chung — nhấn để chuyển sang salt ngẫu nhiên riêng",
-    saltStatusRandom:   "Đang dùng salt ngẫu nhiên riêng ✓",
-    saltRotateBtn:      "Nâng cấp",
-    saltRotateConfirm:  "Thao tác này sẽ mã hóa lại toàn bộ dữ liệu bằng salt ngẫu nhiên mới, riêng cho vault của bạn. Hãy chắc chắn bạn đã có bản sao lưu trước khi tiếp tục. Tiếp tục?",
-    saltRotating:       "Đang nâng cấp {n}/{total}...",
-    saltRotateDone:     "Hoàn tất — mã hóa giờ dùng salt ngẫu nhiên riêng",
-    saltRotateFailed:   "Nâng cấp thất bại, dữ liệu của bạn không đổi. Vui lòng thử lại",
   }
 };
 
@@ -795,7 +791,7 @@ function applyLang() {
     var el = document.getElementById(id); if (!el) return;
     el.classList.toggle("active", id.endsWith(LANG));
   });
-  if (MASTER_RAW) { buildChips(); renderList(); } // renderList refreshes sort label too
+  if (UNLOCKED) { buildChips(); renderList(); } // renderList refreshes sort label too
   localStorage.setItem("mv_lang", LANG);
 }
 
@@ -806,455 +802,320 @@ function setLang(lang) {
 }
 
 // ══════════════════════════════════════════════════════════
-// ❶ CRYPTO MODULE — PBKDF2 + AES-GCM (Web Crypto API native)
-//    Nhanh (~50ms cho 100k iterations), không cần thư viện ngoài
-// ══════════════════════════════════════════════════════════
+// ❶ CRYPTO MODULE — v3
+// Random per-vault salt + random per-record salt/IV.
+// PBKDF2 protects the vault key; HKDF derives a unique AES-GCM key per record.
+// Legacy v2 records remain readable during migration.
 
-function u8ToHex(u8) {
-  return Array.from(u8).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-}
-function hexToU8(hex) {
-  var a = new Uint8Array(hex.length / 2);
-  for (var i = 0; i < hex.length; i += 2) a[i/2] = parseInt(hex.slice(i,i+2), 16);
-  return a;
-}
-function u8ToB64(u8) { return btoa(String.fromCharCode.apply(null, u8)); }
-function b64ToU8(b64) {
-  var bin = atob(b64), a = new Uint8Array(bin.length);
-  for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
-  return a;
-}
+function u8ToHex(u8){return Array.from(u8).map(function(b){return b.toString(16).padStart(2,'0');}).join('');}
+function hexToU8(hex){var a=new Uint8Array(hex.length/2);for(var i=0;i<hex.length;i+=2)a[i/2]=parseInt(hex.slice(i,i+2),16);return a;}
+function u8ToB64(u8){var s='';for(var i=0;i<u8.length;i++)s+=String.fromCharCode(u8[i]);return btoa(s);}
+function b64ToU8(b64){var bin=atob(b64),a=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a;}
+function u8ToB64Url(u8){return u8ToB64(u8).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function b64UrlToU8(s){s=(s||'').replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return b64ToU8(s);}
+function abToB64Url(ab){return u8ToB64Url(new Uint8Array(ab));}
+function randomU8(n){return crypto.getRandomValues(new Uint8Array(n));}
 
-// Salt CŨ (trước khi có cơ chế server-side salt) — cần giữ lại để tương
-// thích ngược. QUAN TRỌNG: nếu server chưa từng lưu salt nào, KHÔNG được
-// sinh salt ngẫu nhiên mới ở đây — vì mọi mật khẩu đã lưu từ trước đều
-// được mã hóa dựa trên salt CỐ ĐỊNH này. Sinh salt khác đi sẽ khiến toàn
-// bộ dữ liệu cũ không giải mã lại được (dù gõ đúng Master Password), vì
-// khóa AES suy ra từ PBKDF2(password, salt) sẽ khác hẳn khóa lúc mã hóa.
-var LEGACY_SALT_STR = 'myvault_personal_salt_2026_unique';
-function legacySaltHex() {
-  return u8ToHex(new TextEncoder().encode(LEGACY_SALT_STR));
-}
+async function sha1Hex(s){var h=await crypto.subtle.digest('SHA-1',new TextEncoder().encode(s));return u8ToHex(new Uint8Array(h)).toUpperCase();}
+async function sha256Hex(s){var h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return u8ToHex(new Uint8Array(h));}
 
-// Lấy salt từ server (đồng bộ đa thiết bị). Nếu server chưa có (vault cũ
-// nâng cấp lên bản có server-side salt lần đầu), dùng salt CŨ để tương
-// thích ngược với dữ liệu đã mã hóa từ trước, rồi lưu chính thức lên
-// server. Muốn chuyển hẳn sang salt ngẫu nhiên thật, dùng rotateSalt()
-// (chạy sau khi đã unlock, tự re-encrypt toàn bộ dữ liệu).
-// Nếu không có mạng, tạm dùng bản cache cục bộ (localStorage) để vault vẫn
-// mở được, và sẽ đồng bộ lại khi có mạng.
-async function getOrCreateSalt() {
-  try {
-    var res = await apiGet({action:'getSalt'});
-    if (res && res.salt) {
-      SALT_HEX = res.salt;
-      localStorage.setItem(SALT_CACHE_KEY, SALT_HEX);
-      return SALT_HEX;
+async function derivePasswordKey(password,salt){
+  var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:KDF_ITER,hash:'SHA-256'},km,
+    {name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function deriveLegacyKey(password){
+  var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode(LEGACY_FIXED_SALT),iterations:100000,hash:'SHA-256'},
+    km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function wrapRawKey(rawKeyBytes,wrappingKey){
+  var iv=randomU8(12),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},wrappingKey,rawKeyBytes);
+  return {iv:u8ToB64(iv),ct:u8ToB64(new Uint8Array(ct))};
+}
+async function unwrapRawKey(wrapped,wrappingKey){
+  var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToU8(wrapped.iv)},wrappingKey,b64ToU8(wrapped.ct));
+  return new Uint8Array(pt);
+}
+async function importVaultKey(raw){return crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},false,['encrypt','decrypt']);}
+async function deriveRecordKey(vaultRaw,salt){
+  var base=await crypto.subtle.importKey('raw',vaultRaw,'HKDF',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:salt,info:new TextEncoder().encode('MyVault record v3')},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptData(plaintext){
+  if(!plaintext) return '';
+  if(!VAULT_KEY) throw new Error('Vault key unavailable');
+  var raw=new Uint8Array(await crypto.subtle.exportKey('raw',VAULT_KEY));
+  var salt=randomU8(16),iv=randomU8(12);
+  var key=await deriveRecordKey(raw,salt);
+  var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(plaintext));
+  return 'v3:'+u8ToB64(salt)+':'+u8ToB64(iv)+':'+u8ToB64(new Uint8Array(ct));
+}
+async function decryptData(ciphertext){
+  if(!ciphertext)return '';
+  try{
+    if(ciphertext.startsWith('v3:')){
+      var p=ciphertext.split(':'),salt=b64ToU8(p[1]),iv=b64ToU8(p[2]),ct=b64ToU8(p[3]);
+      var raw=new Uint8Array(await crypto.subtle.exportKey('raw',VAULT_KEY));
+      var key=await deriveRecordKey(raw,salt);
+      var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:iv},key,ct);
+      return new TextDecoder().decode(pt);
     }
-  } catch(e) { /* offline hoặc server chưa hỗ trợ getSalt — thử cache cục bộ */ }
-
-  var cached = localStorage.getItem(SALT_CACHE_KEY);
-  if (cached) { SALT_HEX = cached; return SALT_HEX; }
-
-  // Server chưa từng lưu salt nào → bootstrap bằng salt CŨ (tương thích
-  // ngược với dữ liệu đã mã hóa từ trước khi có tính năng này).
-  SALT_HEX = legacySaltHex();
-  localStorage.setItem(SALT_CACHE_KEY, SALT_HEX);
-  try { await apiPost({action:'setSalt', salt: SALT_HEX}); } catch(e) { /* sẽ thử lại lần sau */ }
-  return SALT_HEX;
-}
-
-// Khởi tạo PBKDF2 key từ master password (gọi mỗi lần unlock)
-async function initCrypto(password) {
-  if (!SALT_HEX) await getOrCreateSalt();
-  var enc = new TextEncoder();
-  var saltU8 = hexToU8(SALT_HEX);
-  var keyMaterial = await crypto.subtle.importKey(
-    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
-  );
-  DERIVED_KEY = await crypto.subtle.deriveKey(
-    { name:'PBKDF2', salt:saltU8, iterations:KDF_ITER, hash:'SHA-256' },
-    keyMaterial,
-    { name:'AES-GCM', length:256 },
-    false, ['encrypt','decrypt']
-  );
-}
-
-// Mã hóa mới: định dạng "v2:<iv_hex>:<ct_base64>"
-async function encryptData(plaintext) {
-  if (!plaintext) return '';
-  var iv = crypto.getRandomValues(new Uint8Array(12));
-  var ct = await crypto.subtle.encrypt(
-    { name:'AES-GCM', iv:iv }, DERIVED_KEY,
-    new TextEncoder().encode(plaintext)
-  );
-  return 'v2:' + u8ToHex(iv) + ':' + u8ToB64(new Uint8Array(ct));
-}
-
-// Mã hóa với key tùy chỉnh (dùng khi đổi master password)
-async function encryptWithKey(plaintext, cryptoKey) {
-  if (!plaintext) return '';
-  var iv = crypto.getRandomValues(new Uint8Array(12));
-  var ct = await crypto.subtle.encrypt(
-    { name:'AES-GCM', iv:iv }, cryptoKey,
-    new TextEncoder().encode(plaintext)
-  );
-  return 'v2:' + u8ToHex(iv) + ':' + u8ToB64(new Uint8Array(ct));
-}
-
-// Giải mã tự động: nhận diện format cũ (CryptoJS) và mới (v2)
-async function decryptData(ciphertext) {
-  if (!ciphertext) return '';
-  if (ciphertext.startsWith('v2:')) {
-    // ── Format mới: PBKDF2 + AES-GCM ──
-    try {
-      var parts = ciphertext.split(':');
-      var iv = hexToU8(parts[1]);
-      var ct = b64ToU8(parts[2]);
-      var plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv:iv }, DERIVED_KEY, ct);
-      return new TextDecoder().decode(plain);
-    } catch(e) { return ''; }
-  } else {
-    // ── Format cũ: CryptoJS AES (backward compat) ──
-    try {
-      return CryptoJS.AES.decrypt(ciphertext, MASTER_RAW).toString(CryptoJS.enc.Utf8) || '';
-    } catch(e) { return ''; }
-  }
-}
-
-// ❷ AUTH VERIFIER HASH — dùng để ĐĂNG NHẬP (login), KHÔNG dùng để mã hóa.
-//    Quan trọng: đây KHÔNG phải AUTH_TOKEN cũ (SHA-256 trần của mật khẩu —
-//    rất yếu vì có thể brute-force tức thì nếu lộ). Thay vào đó:
-//    - Dùng PBKDF2 CHẬM giống hệt khóa mã hóa (cùng KDF_ITER) → dò ngược tốn
-//      chi phí y hệt việc bẻ khóa mã hóa, không có đường tắt nào rẻ hơn.
-//    - Dùng SALT KHÁC (tách miền / domain separation, thêm hậu tố ":auth")
-//      để hash đăng nhập này về mặt toán học độc lập với DERIVED_KEY — dù
-//      hash này có lộ ra, nó không "là" chìa khóa giải mã, chỉ là bằng
-//      chứng đã biết đúng mật khẩu.
-//    Hash này chỉ gửi lên server ĐÚNG 1 LẦN lúc login để đổi lấy SESSION_TOKEN;
-//    các request sau đó dùng SESSION_TOKEN, không gửi lại gì liên quan mật khẩu nữa.
-async function deriveAuthHash(password, saltHex) {
-  var enc = new TextEncoder();
-  var authSaltSeed = enc.encode(saltHex + ':auth');
-  var authSaltDigest = await crypto.subtle.digest('SHA-256', authSaltSeed); // salt riêng, tách khỏi salt mã hóa
-  var keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  var bits = await crypto.subtle.deriveBits(
-    { name:'PBKDF2', salt: new Uint8Array(authSaltDigest), iterations: KDF_ITER, hash:'SHA-256' },
-    keyMaterial, 256
-  );
-  return u8ToHex(new Uint8Array(bits));
-}
-
-// ══════════════════════════════════════════════════════════
-// ❸ BIOMETRIC QUICK UNLOCK — WebAuthn PRF extension
-//
-// Cách hoạt động (an toàn, không đổi kiến trúc mã hóa hiện có):
-//  1. Người dùng mở khóa bình thường bằng Master Password ít nhất 1 lần.
-//  2. Trong Settings, bật "Biometric Quick Unlock": trình duyệt tạo 1
-//     passkey/WebAuthn credential gắn với Face ID / Touch ID / vân tay
-//     của THIẾT BỊ NÀY (không gửi lên server).
-//  3. Dùng phần mở rộng "prf" của WebAuthn để lấy ra 32 bytes bí mật
-//     do trình xác thực (Secure Enclave / TEE) sinh ra — bytes này CHỈ
-//     xuất hiện khi sinh trắc học xác thực thành công.
-//  4. Dùng 32 bytes đó làm khóa AES-GCM để MÃ HÓA (wrap) Master Password
-//     và lưu bản mã hóa này trong localStorage của thiết bị (không gửi
-//     lên server, không rời khỏi máy).
-//  5. Lần sau, chạm Face ID/Touch ID → trình duyệt trả lại đúng 32 bytes
-//     đó → giải mã ra Master Password → chạy lại luồng unlock bình
-//     thường (PBKDF2 như cũ). Máy chủ hoàn toàn không biết gì về sinh
-//     trắc học; Master Password chưa từng rời khỏi thiết bị.
-//  Nếu thiết bị/trình duyệt không hỗ trợ "prf" (một số Android cũ,
-//  Firefox…), tính năng tự ẩn đi và người dùng vẫn dùng mật khẩu bình
-//  thường — không có gì bị hỏng.
-// ══════════════════════════════════════════════════════════
-var BIO_CRED_KEY    = 'mv_bio_cred';     // credential id (base64), lưu cục bộ
-var BIO_WRAPPED_KEY = 'mv_bio_wrapped';  // "iv_hex:ciphertext_base64" của Master Password đã wrap
-var BIO_PRF_SALT    = new TextEncoder().encode('myvault-quickunlock-v1'); // salt cố định cho PRF, không cần giữ bí mật
-
-function isWebAuthnSupported() {
-  return !!(window.PublicKeyCredential && navigator.credentials);
-}
-function isBiometricEnabled() {
-  return !!(localStorage.getItem(BIO_CRED_KEY) && localStorage.getItem(BIO_WRAPPED_KEY));
-}
-
-// Cập nhật nút trên lock screen + dòng trạng thái trong Settings
-function updateBioUI() {
-  var supported = isWebAuthnSupported();
-  var enabled = isBiometricEnabled();
-
-  var wrap = document.getElementById('bio-unlock-wrap');
-  if (wrap) wrap.style.display = (supported && enabled) ? 'block' : 'none';
-
-  var hint = document.getElementById('bio-status-hint');
-  var icon = document.getElementById('bio-status-icon');
-  if (hint) {
-    if (!supported) { hint.textContent = t('bioNotSupported'); if(icon) icon.textContent=''; }
-    else if (enabled) { hint.textContent = t('bioSetupSubOn'); if(icon) icon.textContent = '✓ ' + t('bioDisableBtn'); }
-    else { hint.textContent = t('bioSetupSubOff'); if(icon) icon.textContent = t('bioEnableBtn') + ' ›'; }
-  }
-}
-
-// Gọi từ Settings — bật hoặc tắt tùy trạng thái hiện tại
-function toggleBiometric() {
-  if (!isWebAuthnSupported()) { toast(t('bioNotSupported')); return; }
-  if (isBiometricEnabled()) {
-    if (confirm(t('bioConfirmDisable'))) disableBiometric();
-  } else {
-    enableBiometric();
-  }
-}
-
-async function enableBiometric() {
-  if (!isWebAuthnSupported()) { toast(t('bioNotSupported')); return; }
-  if (!MASTER_RAW) { toast(t('bioNeedUnlock')); return; }
-  try {
-    var challenge = crypto.getRandomValues(new Uint8Array(32));
-    var userId = crypto.getRandomValues(new Uint8Array(16));
-    var cred = await navigator.credentials.create({
-      publicKey: {
-        challenge: challenge,
-        rp: { name: 'MyVault' },
-        user: { id: userId, name: 'myvault-owner', displayName: 'MyVault' },
-        pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
-        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
-        extensions: { prf: { eval: { first: BIO_PRF_SALT } } },
-        timeout: 60000
-      }
-    });
-    if (!cred) throw new Error('no credential');
-
-    // Một số trình xác thực chỉ trả kết quả PRF ở lần get() đầu tiên, không phải lúc create()
-    var ext = cred.getClientExtensionResults();
-    var prfBytes = ext && ext.prf && ext.prf.results && ext.prf.results.first;
-    if (!prfBytes) {
-      var getRes = await navigator.credentials.get({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          allowCredentials: [{ id: cred.rawId, type: 'public-key' }],
-          userVerification: 'required',
-          extensions: { prf: { eval: { first: BIO_PRF_SALT } } }
-        }
-      });
-      var ext2 = getRes.getClientExtensionResults();
-      prfBytes = ext2 && ext2.prf && ext2.prf.results && ext2.prf.results.first;
+    if(ciphertext.startsWith('v2:')){
+      var q=ciphertext.split(':'),iv2=hexToU8(q[1]),ct2=b64ToU8(q[2]);
+      var pt2=await crypto.subtle.decrypt({name:'AES-GCM',iv:iv2},LEGACY_KEY,ct2);
+      return new TextDecoder().decode(pt2);
     }
-    if (!prfBytes) { toast(t('bioPrfUnsupported')); return; }
+    return CryptoJS.AES.decrypt(ciphertext,MASTER_RAW).toString(CryptoJS.enc.Utf8)||'';
+  }catch(e){return '';}
+}
 
-    var wrapKey = await crypto.subtle.importKey('raw', prfBytes, 'AES-GCM', false, ['encrypt']);
-    var iv = crypto.getRandomValues(new Uint8Array(12));
-    var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, wrapKey, new TextEncoder().encode(MASTER_RAW));
+function readMeta(){try{return JSON.parse(localStorage.getItem(META_KEY)||'null');}catch(e){return null;}}
+function writeMeta(){localStorage.setItem(META_KEY,JSON.stringify(META));}
+var META=readMeta();
 
-    localStorage.setItem(BIO_CRED_KEY, u8ToB64(new Uint8Array(cred.rawId)));
-    localStorage.setItem(BIO_WRAPPED_KEY, u8ToHex(iv) + ':' + u8ToB64(new Uint8Array(ct)));
-    toast(t('bioEnabled'));
-    updateBioUI();
-  } catch (e) {
-    toast(t('bioSetupFailed') + (e && e.message ? (': ' + e.message) : ''));
+async function ensureVaultMeta(password){
+  if(!META || META.version!==VAULT_VERSION || !META.passwordWrap){
+    var salt=randomU8(16),key=await derivePasswordKey(password,salt),raw=randomU8(32);
+    META={version:3,kdf:'PBKDF2-SHA256',iterations:KDF_ITER,salt:u8ToB64(salt),
+      passwordWrap:await wrapRawKey(raw,key),passkey:null,totp:null};
+    VAULT_KEY=await importVaultKey(raw);writeMeta();return;
   }
+  var key=await derivePasswordKey(password,b64ToU8(META.salt));
+  var raw=await unwrapRawKey(META.passwordWrap,key);
+  VAULT_KEY=await importVaultKey(raw);
 }
+async function changePasswordWrap(newPassword){
+  var salt=randomU8(16),key=await derivePasswordKey(newPassword,salt);
+  var raw=new Uint8Array(await crypto.subtle.exportKey('raw',VAULT_KEY));
+  META.salt=u8ToB64(salt);META.passwordWrap=await wrapRawKey(raw,key);META.iterations=KDF_ITER;writeMeta();
+}
+async function computeAuthToken(password){return sha256Hex('myvault-bootstrap:'+password);}
 
-async function biometricUnlock() {
-  if (!isBiometricEnabled()) return;
-  var btn = document.getElementById('bio-unlock-btn');
-  if (btn) { btn.disabled = true; }
-  try {
-    var credId = b64ToU8(localStorage.getItem(BIO_CRED_KEY));
-    var res = await navigator.credentials.get({
-      publicKey: {
-        challenge: crypto.getRandomValues(new Uint8Array(32)),
-        allowCredentials: [{ id: credId.buffer, type: 'public-key' }],
-        userVerification: 'required',
-        extensions: { prf: { eval: { first: BIO_PRF_SALT } } }
-      }
-    });
-    var ext = res.getClientExtensionResults();
-    var prfBytes = ext && ext.prf && ext.prf.results && ext.prf.results.first;
-    if (!prfBytes) { toast(t('bioPrfUnsupported')); return; }
-
-    var wrapped = localStorage.getItem(BIO_WRAPPED_KEY);
-    var parts = wrapped.split(':');
-    var iv = hexToU8(parts[0]);
-    var ct = b64ToU8(parts[1]);
-    var unwrapKey = await crypto.subtle.importKey('raw', prfBytes, 'AES-GCM', false, ['decrypt']);
-    var plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, unwrapKey, ct);
-    var pw = new TextDecoder().decode(plain);
-
-    await unlockWithPassword(pw, /*skipTypedCheck=*/true);
-  } catch (e) {
-    toast(t('bioUnlockFailed'));
-  } finally {
-    if (btn) btn.disabled = false;
+function passwordScore(pw){
+  var score=0;
+  if((pw||'').length>=12)score++;
+  if(/[a-z]/.test(pw))score++;
+  if(/[A-Z]/.test(pw))score++;
+  if(/[0-9]/.test(pw))score++;
+  if(/[^A-Za-z0-9]/.test(pw))score++;
+  return score;
+}
+async function checkPwnedPassword(pw){
+  try{
+    var h=await sha1Hex(pw),prefix=h.slice(0,5),suffix=h.slice(5);
+    var r=await fetch(HIBP_URL+prefix,{headers:{'Add-Padding':'true'}});
+    if(!r.ok)throw new Error('HIBP '+r.status);
+    var body=await r.text(),hit=false,count=0;
+    body.split(/\r?\n/).forEach(function(line){var x=line.split(':');if(x[0]&&x[0].toUpperCase()===suffix){hit=true;count=parseInt(x[1]||'0',10);}});
+    return {pwned:hit,count:count};
+  }catch(e){return {pwned:false,unknown:true};}
+}
+async function duplicatePassword(pw,excludeId){
+  for(var i=0;i<DATA.length;i++){
+    if(excludeId&&DATA[i].id===excludeId)continue;
+    var d=await apiGet({action:'getCiphertext',id:DATA[i].id});if(!d)continue;
+    var old=await decryptData(d.password_encrypted);
+    if(old&&old===pw)return DATA[i];
   }
+  return null;
 }
 
-function disableBiometric() {
-  localStorage.removeItem(BIO_CRED_KEY);
-  localStorage.removeItem(BIO_WRAPPED_KEY);
-  updateBioUI();
-  toast(t('bioDisabled'));
+// ---------- WebAuthn / Passkey PRF ----------
+function webauthnSupported(){return !!(window.PublicKeyCredential&&navigator.credentials&&location.protocol==='https:');}
+function normalizeCreationOptions(o){
+  if(typeof PublicKeyCredential!=='undefined'&&PublicKeyCredential.parseCreationOptionsFromJSON)return PublicKeyCredential.parseCreationOptionsFromJSON(o);
+  var x=JSON.parse(JSON.stringify(o));if(typeof x.challenge==='string')x.challenge=b64UrlToU8(x.challenge).buffer;
+  if(x.user&&typeof x.user.id==='string')x.user.id=b64UrlToU8(x.user.id).buffer;
+  if(x.excludeCredentials)x.excludeCredentials=x.excludeCredentials.map(function(c){var z=Object.assign({},c);if(typeof z.id==='string')z.id=b64UrlToU8(z.id);return z;});
+  return x;
 }
+function normalizeRequestOptions(o){
+  if(typeof PublicKeyCredential!=='undefined'&&PublicKeyCredential.parseRequestOptionsFromJSON)return PublicKeyCredential.parseRequestOptionsFromJSON(o);
+  var x=JSON.parse(JSON.stringify(o));if(typeof x.challenge==='string')x.challenge=b64UrlToU8(x.challenge).buffer;
+  if(x.allowCredentials)x.allowCredentials=x.allowCredentials.map(function(c){var z=Object.assign({},c);if(typeof z.id==='string')z.id=b64UrlToU8(z.id);return z;});
+  return x;
+}
+function credentialJSON(c){
+  if(c&&typeof c.toJSON==='function')return c.toJSON();
+  var r=c.response;return {id:c.id,rawId:abToB64Url(c.rawId),type:c.type,response:{
+    clientDataJSON:abToB64Url(r.clientDataJSON),authenticatorData:r.authenticatorData?abToB64Url(r.authenticatorData):undefined,
+    signature:r.signature?abToB64Url(r.signature):undefined,userHandle:r.userHandle?abToB64Url(r.userHandle):undefined,
+    attestationObject:r.attestationObject?abToB64Url(r.attestationObject):undefined}};
+}
+async function hkdfFromPrf(prfBytes,salt){
+  var base=await crypto.subtle.importKey('raw',prfBytes,'HKDF',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:salt,info:new TextEncoder().encode('MyVault passkey wrap v1')},
+    base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+function getPrfResult(ext){return ext&&ext.prf&&ext.prf.results&&ext.prf.results.first?new Uint8Array(ext.prf.results.first):null;}
 
-// ══════════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════════
-// Flag: chỉ cho phép unlock khi user thực sự gõ/paste vào ô
-var USER_TYPED = false;
-
-window.addEventListener('load', function() {
-  FILTER = t("all");
-  applyLang();
-  // Init sort button state on page load (before unlock)
-  var _sortBtn = document.getElementById("sort-btn");
-  var _sortLbl = document.getElementById("sort-label");
-  if (_sortBtn && _sortLbl) {
-    _sortLbl.textContent = SORT === "name_asc" ? "A→Z" : SORT === "name_desc" ? "Z→A" : SORT === "type_asc" ? "Cat" : "Date";
-    _sortBtn.classList.toggle("on", SORT !== "date");
-    ["name_asc","name_desc","type_asc","date"].forEach(function(k){
-      var el=document.getElementById("sopt-"+k); if(el) el.classList.toggle("active", k===SORT);
-    });
+async function setupPasskey(){
+  if(!UNLOCKED||!VAULT_KEY)return;
+  if(DATA.length && !isUpgraded()){
+    if(!confirm(LANG==='vi'?'Cần nâng cấp dữ liệu cũ lên v3 trước khi bật Passkey. Tiếp tục?':'Legacy records must be migrated to v3 before enabling Passkey. Continue?')) return;
+    await migrateAllToV3();
   }
-  updateBioUI(); // hiện nút Face ID/Touch ID trên lock screen nếu thiết bị này đã thiết lập
-  // Theo dõi người dùng thực sự tương tác với ô password
-  var inp = document.getElementById("master-input");
-  if (inp) {
-    // input event: bắt cả gõ phím lẫn paste thủ công
-    inp.addEventListener("input", function() { USER_TYPED = true; });
-    // keydown: chắc chắn là gõ tay
-    inp.addEventListener("keydown", function() { USER_TYPED = true; });
+  if(!webauthnSupported()){toast(t("passkeyNeedHttps"));return;}
+  META.passkey=META.passkey||{prfSalt:u8ToB64(randomU8(32))};
+  var salt=b64ToU8(META.passkey.prfSalt);
+  try{
+    var begin=await apiGet({action:'beginPasskeyRegistration'});
+    var opts=normalizeCreationOptions(begin.publicKey||begin);
+    opts.extensions=opts.extensions||{};opts.extensions.prf={eval:{first:salt}};
+    opts.authenticatorSelection=opts.authenticatorSelection||{};opts.authenticatorSelection.userVerification='required';
+    var cred=await navigator.credentials.create({publicKey:opts});
+    var prf=getPrfResult(cred.getClientExtensionResults());
+    if(!prf){toast(t("passkeyUnsupported"));return;}
+    var wrapKey=await hkdfFromPrf(prf,salt),raw=new Uint8Array(await crypto.subtle.exportKey('raw',VAULT_KEY));
+    META.passkey.credentialId=cred.id;META.passkey.wrap=await wrapRawKey(raw,wrapKey);
+    var fin=await apiPostRaw({action:'finishPasskeyRegistration',credential:credentialJSON(cred)});
+    if(!fin||!fin.success){toast(t("passkeySetupFail"));return;}
+    writeMeta();updateSecurityStatus();toast(t("passkeySetupDone"));
+  }catch(e){console.error(e);toast(t("passkeySetupFail")+': '+e.message);}
+}
+async function unlockWithPasskey(){
+  if(!META||!META.passkey||!META.passkey.credentialId)return;
+  if(!webauthnSupported()){toast(t("passkeyNeedHttps"));return;}
+  try{
+    var begin=await apiGet({action:'beginPasskeyLogin'}),opts=normalizeRequestOptions(begin.publicKey||begin);
+    opts.userVerification='required';opts.allowCredentials=opts.allowCredentials||[{type:'public-key',id:b64UrlToU8(META.passkey.credentialId)}];
+    opts.extensions=opts.extensions||{};opts.extensions.prf={evalByCredential:{}};
+    opts.extensions.prf.evalByCredential[META.passkey.credentialId]={first:b64ToU8(META.passkey.prfSalt)};
+    var cred=await navigator.credentials.get({publicKey:opts}),prf=getPrfResult(cred.getClientExtensionResults());
+    if(!prf)throw new Error('PRF unavailable');
+    var wrapKey=await hkdfFromPrf(prf,b64ToU8(META.passkey.prfSalt)),raw=await unwrapRawKey(META.passkey.wrap,wrapKey);
+    VAULT_KEY=await importVaultKey(raw);
+    var fin=await apiPostRaw({action:'finishPasskeyLogin',credential:credentialJSON(cred)});
+    if(!fin||!fin.sessionToken)throw new Error('No server session');
+    SESSION_TOKEN=fin.sessionToken;await finishUnlock();
+  }catch(e){console.error(e);document.getElementById("lerr").style.display="block";document.getElementById("lerr").textContent=t("sessionFail");}
+}
+async function createPasswordSession(){
+  var r=await apiPostRaw({action:'createSession',proofType:'password',proof:AUTH_TOKEN});
+  if(!r||!r.sessionToken)throw new Error('No session token');SESSION_TOKEN=r.sessionToken;AUTH_TOKEN='';
+}
+async function finishUnlock(){
+  UNLOCKED=true;FILTER=t("all");USER_TYPED=false;
+  document.getElementById("lock-screen").style.display="none";document.getElementById("app").style.display="block";
+  document.getElementById("lerr").style.display="none";resetLockTimer();
+  if(META&&META.totp&&META.totp.enabled){
+    var secret=await decryptData(META.totp.secretEncrypted);if(!(await requireTotp(secret))){doLock();return;}
   }
-  setTimeout(function() {
-    var i = document.getElementById("master-input");
-    if (i) i.focus();
-  }, 300);
-});
-
-// ══════════════════════════════════════════════════════════
-// AUTO-LOCK
-// ══════════════════════════════════════════════════════════
-function resetLockTimer() {
-  clearTimeout(LOCK_TIMER);
-  LOCK_TIMER = setTimeout(function() {
-    if (MASTER_RAW) { doLock(); toast(t("autoLocked")); }
-  }, LOCK_DELAY);
+  loadAccounts();updateSecurityStatus();
 }
-document.addEventListener("click", resetLockTimer);
-document.addEventListener("keydown", resetLockTimer);
-document.addEventListener("touchstart", resetLockTimer);
-
-// ══════════════════════════════════════════════════════════
-// API — SESSION_TOKEN được gửi kèm mọi request (đọc & ghi)
-// ══════════════════════════════════════════════════════════
-function apiGet(params) {
-  var p = Object.assign({}, params);
-  if (SESSION_TOKEN) p._session = SESSION_TOKEN; // đọc dữ liệu cũng cần phiên hợp lệ (trước đây getAccounts/getCiphertext không hề được bảo vệ)
-  var url = GAS_URL + "?" + Object.keys(p).map(function(k){
-    return k+"="+encodeURIComponent(p[k]);
-  }).join("&");
-  return fetch(url).then(function(r){ return r.json(); }).then(handleApiResult);
-}
-function apiPost(body) {
-  body._session = SESSION_TOKEN; // gửi session token thay vì AUTH_TOKEN suy từ mật khẩu
-  return fetch(GAS_URL, {
-    method:"POST", headers:{"Content-Type":"text/plain"}, body:JSON.stringify(body)
-  }).then(function(r){ return r.json(); }).then(handleApiResult);
-}
-// Nếu server báo phiên đã hết hạn / không hợp lệ → tự khóa vault và yêu cầu
-// đăng nhập lại, thay vì âm thầm lỗi khó hiểu ở giữa chừng thao tác.
-function handleApiResult(res) {
-  if (res && res.error === 'session_expired') {
-    if (MASTER_RAW) { doLock(); toast(t('sessionExpired')); }
-    throw new Error('session_expired');
-  }
-  return res;
-}
-
-// ══════════════════════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════════════════════
-async function doUnlock() {
-  var pw = document.getElementById("master-input").value.trim();
-  if (!pw) return;
-
-  // Chặn autofill tự động: bắt buộc user phải đã gõ/paste thực sự
-  if (!USER_TYPED) {
-    var inp = document.getElementById("master-input");
-    // Clear giá trị autofill, yêu cầu nhập lại
-    inp.value = "";
-    inp.focus();
-    document.getElementById("lerr").style.display = "block";
-    document.getElementById("lerr").textContent = LANG === "vi"
-      ? "Vui lòng gõ mật khẩu trực tiếp vào ô này."
-      : "Please type your password directly.";
+async function setupTotp(){
+  if(!UNLOCKED||!VAULT_KEY)return;
+  if(META.totp&&META.totp.enabled){
+    if(confirm(LANG==='vi'?'Tắt 2FA TOTP cho Vault?':'Disable Vault TOTP 2FA?')){META.totp=null;writeMeta();updateSecurityStatus();toast(t("totpDisabled"));}
     return;
   }
-
-  await unlockWithPassword(pw, false);
+  var secret=base32Encode(randomU8(20)),answer=prompt(t("totpSecret")+"\n\n"+secret+"\n\n"+t("totpCode")+":");
+  if(answer===null)return;
+  if(!(await verifyTotp(secret,answer))){toast(t("totpBad"));return;}
+  META.totp={enabled:true,secretEncrypted:await encryptData(secret)};writeMeta();updateSecurityStatus();toast(t("totpEnabled"));
+}
+function base32Encode(bytes){
+  var alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',out='',bits=0,value=0;
+  for(var i=0;i<bytes.length;i++){value=(value<<8)|bytes[i];bits+=8;while(bits>=5){out+=alphabet[(value>>>(bits-5))&31];bits-=5;}}
+  if(bits>0)out+=alphabet[(value<<(5-bits))&31];return out;
+}
+function base32Decode(s){
+  var alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',bits=0,value=0,out=[];s=(s||'').replace(/=+$/,'').toUpperCase();
+  for(var i=0;i<s.length;i++){var v=alphabet.indexOf(s[i]);if(v<0)continue;value=(value<<5)|v;bits+=5;if(bits>=8){out.push((value>>>(bits-8))&255);bits-=8;}}
+  return new Uint8Array(out);
+}
+async function totpCode(secret,counter){
+  var key=await crypto.subtle.importKey('raw',base32Decode(secret),{name:'HMAC',hash:'SHA-1'},false,['sign']),msg=new Uint8Array(8);
+  for(var i=7;i>=0;i--){msg[i]=counter&255;counter=Math.floor(counter/256);}
+  var h=new Uint8Array(await crypto.subtle.sign('HMAC',key,msg)),off=h[h.length-1]&15;
+  var n=((h[off]&127)<<24)|(h[off+1]<<16)|(h[off+2]<<8)|h[off+3];return String(n%1000000).padStart(6,'0');
+}
+async function verifyTotp(secret,code){
+  if(!secret||!/^\d{6}$/.test(String(code||'')))return false;var c=Math.floor(Date.now()/30000);
+  for(var d=-1;d<=1;d++)if((await totpCode(secret,c+d))===String(code))return true;return false;
+}
+async function requireTotp(secret){var code=prompt(t("totpPrompt"));if(code===null)return false;var ok=await verifyTotp(secret,code);if(!ok)toast(t("totpBad"));return ok;}
+function updateSecurityStatus(){
+  var p=document.getElementById("passkey-status"),t2=document.getElementById("totp-status");
+  if(p)p.textContent=(META&&META.passkey&&META.passkey.credentialId)?'✓':'›';
+  if(t2)t2.textContent=(META&&META.totp&&META.totp.enabled)?'✓':'›';
+  var pb=document.getElementById("passkey-btn");if(pb)pb.style.display=(META&&META.passkey&&META.passkey.credentialId)?'flex':'none';
 }
 
-// Lõi mở khóa dùng chung cho cả gõ tay và sinh trắc học.
-// skipTypedCheck=true khi được gọi từ biometricUnlock() — thao tác chạm
-// Face ID/Touch ID tự nó đã là một hành động chủ động của người dùng,
-// nên không cần bắt buộc phải "gõ" vào ô mật khẩu nữa.
-async function unlockWithPassword(pw, skipTypedCheck) {
-  var btn = document.getElementById("unlock-btn");
-  btn.disabled = true;
-  btn.innerHTML = t("unlocking");
-
-  try {
-    MASTER_RAW = pw;
-    await initCrypto(pw); // đảm bảo đã có SALT_HEX
-
-    var authHash = await deriveAuthHash(pw, SALT_HEX);
-    var loginRes = await apiPost({ action:'login', authHash: authHash });
-    if (!loginRes || !loginRes.success || !loginRes.sessionToken) {
-      throw new Error('login_failed');
-    }
-    SESSION_TOKEN = loginRes.sessionToken;
-
-    FILTER = t("all");
-    USER_TYPED = false; // reset cho lần lock tiếp theo
-    document.getElementById("lock-screen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("lerr").style.display = "none";
-    resetLockTimer();
-    loadAccounts();
-  } catch(e) {
-    MASTER_RAW = ''; DERIVED_KEY = null; SESSION_TOKEN = '';
-    document.getElementById("lerr").style.display = "block";
-    document.getElementById("lerr").textContent = t("unlockErr");
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = t("unlockBtn");
+// Legacy migration.
+async function migrateAllToV3(){
+  var changed=0;
+  for(var i=0;i<DATA.length;i++){
+    var a=DATA[i],d=await apiGet({action:'getCiphertext',id:a.id});if(!d)continue;
+    if((d.password_encrypted||'').startsWith('v3:')&&(!d.notes_encrypted||d.notes_encrypted.startsWith('v3:')))continue;
+    var pw=await decryptData(d.password_encrypted),note=d.notes_encrypted?await decryptData(d.notes_encrypted):'';
+    if(!pw)continue;
+    await apiPost({action:'updateAccount',payload:{id:a.id,password_encrypted:await encryptData(pw),notes_encrypted:note?await encryptData(note):''}});
+    changed++;
   }
+  localStorage.setItem(UPGRADED_KEY,'done');return changed;
 }
 
-function doLock() {
-  clearTimeout(LOCK_TIMER);
-  // Báo server huỷ phiên ngay (best-effort, không chờ kết quả) — nếu request
-  // này thất bại (mất mạng) cũng không sao vì token vẫn tự hết hạn theo thời gian.
-  if (SESSION_TOKEN) {
-    try { apiPost({action:'logout'}).catch(function(){}); } catch(e) {}
+// INIT
+var USER_TYPED=false;
+window.addEventListener('load',function(){
+  FILTER=t("all");applyLang();
+  var inp=document.getElementById("master-input");
+  if(inp){inp.addEventListener("input",function(){USER_TYPED=true;});inp.addEventListener("keydown",function(){USER_TYPED=true;});}
+  updateSecurityStatus();setTimeout(function(){if(inp)inp.focus();},300);
+});
+
+// Auto-lock after 5 minutes and immediately when the page becomes hidden.
+function resetLockTimer(){
+  clearTimeout(LOCK_TIMER);if(!UNLOCKED)return;
+  LOCK_TIMER=setTimeout(function(){if(UNLOCKED){doLock();toast(t("autoLocked"));}},LOCK_DELAY);
+}
+document.addEventListener("click",function(){if(UNLOCKED)resetLockTimer();});
+document.addEventListener("keydown",function(){if(UNLOCKED)resetLockTimer();});
+document.addEventListener("touchstart",function(){if(UNLOCKED)resetLockTimer();});
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==='hidden'&&UNLOCKED)doLock();});
+
+// Normal API calls carry only a short-lived server session token.
+// The password-derived proof is used only once during session bootstrap.
+function apiGet(params){
+  params=params||{};if(SESSION_TOKEN)params._session=SESSION_TOKEN;
+  var url=GAS_URL+"?"+Object.keys(params).map(function(k){return k+"="+encodeURIComponent(params[k]);}).join("&");
+  return fetch(url).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();});
+}
+function apiPostRaw(body){
+  return fetch(GAS_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(body)})
+    .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();});
+}
+function apiPost(body){body=body||{};body._session=SESSION_TOKEN;return apiPostRaw(body);}
+
+async function doUnlock(){
+  var pw=document.getElementById("master-input").value;if(!pw)return;
+  if(!USER_TYPED){
+    var inp=document.getElementById("master-input");inp.value="";inp.focus();
+    document.getElementById("lerr").style.display="block";document.getElementById("lerr").textContent=LANG==='vi'?"Vui lòng nhập mật khẩu trực tiếp.":"Please enter the password directly.";return;
   }
-  // Xóa sạch state nhạy cảm khỏi bộ nhớ
-  MASTER_RAW = ''; DERIVED_KEY = null; SESSION_TOKEN = '';
-  DATA = []; SEARCH = ''; FILTER = t("all"); SRCH = false;
-  USER_TYPED = false;
-  document.getElementById("master-input").value = "";
-  // Reset search UI
-  var srchEl = document.getElementById("srch");
-  if (srchEl) srchEl.value = "";
-  var clearBtn = document.getElementById("srch-clear");
-  if (clearBtn) clearBtn.style.display = "none";
-  document.getElementById("app").style.display = "none";
-  document.getElementById("lock-screen").style.display = "flex";
-  closeDrawer();
-  setTimeout(function() {
-    var inp = document.getElementById("master-input"); if (inp) inp.focus();
-  }, 300);
+  var btn=document.getElementById("unlock-btn");btn.disabled=true;btn.innerHTML=t("unlocking");
+  try{
+    MASTER_RAW=pw;LEGACY_KEY=await deriveLegacyKey(pw);await ensureVaultMeta(pw);AUTH_TOKEN=await computeAuthToken(pw);
+    await createPasswordSession();await finishUnlock();MASTER_RAW='';
+  }catch(e){
+    console.error(e);MASTER_RAW='';LEGACY_KEY=null;VAULT_KEY=null;SESSION_TOKEN='';AUTH_TOKEN='';
+    document.getElementById("lerr").style.display="block";
+    document.getElementById("lerr").textContent=/session|backend/i.test(e.message||'')?t("sessionFail"):t("unlockErr");
+  }finally{btn.disabled=false;btn.innerHTML=t("unlockBtn");}
+}
+function doLock(){
+  clearTimeout(LOCK_TIMER);MASTER_RAW='';LEGACY_KEY=null;VAULT_KEY=null;SESSION_TOKEN='';AUTH_TOKEN='';
+  DATA=[];SEARCH='';FILTER=t("all");SRCH=false;UNLOCKED=false;USER_TYPED=false;
+  var mi=document.getElementById("master-input");if(mi)mi.value="";
+  var sr=document.getElementById("srch");if(sr)sr.value="";
+  var cb=document.getElementById("srch-clear");if(cb)cb.style.display="none";
+  document.getElementById("app").style.display="none";document.getElementById("lock-screen").style.display="flex";closeDrawer();updateSecurityStatus();
+  setTimeout(function(){var i=document.getElementById("master-input");if(i)i.focus();},300);
 }
 
-// ══════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════
 function showPanel(n) {
@@ -1267,9 +1128,8 @@ function showPanel(n) {
     // Vault: search bar luôn hiện ở hàng dưới, ẩn nút kính lúp
     sw.classList.add("show");
     document.getElementById("srch-btn").style.display = "none";
-    // Focus search bar để dễ tìm kiếm ngay — đồng bộ, không setTimeout (xem giải thích ở toggleSearch)
-    var i = document.getElementById("srch");
-    if (i) i.focus();
+    // Focus search bar để dễ tìm kiếm ngay
+    setTimeout(function(){ var i=document.getElementById("srch"); if(i) i.focus(); }, 150);
     renderList();
   } else {
     // Panel khác: ẩn search bar, hiện nút kính lúp, clear state
@@ -1282,18 +1142,14 @@ function showPanel(n) {
     sw.classList.remove("show");
     document.getElementById("srch-btn").style.display = "flex";
   }
-  if (n === "settings") { document.getElementById("stat-n").textContent = DATA.length; updateEncStatusUI(); updateBioUI(); }
+  if (n === "settings") { document.getElementById("stat-n").textContent = DATA.length; updateEncStatusUI(); updateSecurityStatus(); }
 }
 function toggleSearch() {
   SRCH = !SRCH;
   var sw = document.getElementById("srchwrap");
   sw.classList.toggle("show", SRCH);
   if (SRCH) {
-    // Focus NGAY LẬP TỨC (đồng bộ trong sự kiện click) — không dùng setTimeout,
-    // vì trên mobile setTimeout làm mất "user activation" nên bàn phím ảo
-    // bật trễ và ký tự gõ đầu tiên bị rơi mất trước khi input thật sự có focus.
-    var i = sw.querySelector("input");
-    if (i) i.focus();
+    setTimeout(function(){ var i=sw.querySelector("input"); if(i) i.focus(); }, 100);
   } else {
     clearSearch();
   }
@@ -1318,7 +1174,7 @@ function loadAccounts() {
       DATA = rows || [];
       buildChips();
       renderList();
-      checkUpgradeNeeded(); // kiểm tra có cần nâng cấp không
+      checkUpgradeNeeded(); updateSecurityStatus();
     })
     .catch(function(e) {
       document.getElementById("acc-list").innerHTML =
@@ -1451,152 +1307,24 @@ function renderList() {
 // ══════════════════════════════════════════════════════════
 // ENCRYPTION UPGRADE (v1 → v2)
 // ══════════════════════════════════════════════════════════
-function isUpgraded() { return localStorage.getItem(UPGRADED_KEY) === 'done'; }
-
-function updateEncStatusUI() {
-  var hint = document.getElementById("enc-status-hint");
-  var icon = document.getElementById("enc-status-icon");
-  var statEnc = document.getElementById("stat-enc");
-  if (!hint) return;
-  if (isUpgraded() || !DATA.length) {
-    hint.textContent = t("encStatusV2");
-    if (icon) { icon.textContent = "✓"; icon.style.color = "var(--gn)"; }
-    if (statEnc) { statEnc.textContent = "PBKDF2"; statEnc.style.fontSize="13px"; statEnc.style.paddingTop="6px"; }
-  } else {
-    hint.textContent = t("encStatusOld");
-    if (icon) { icon.textContent = "›"; icon.style.color = ""; }
-    if (statEnc) { statEnc.textContent = "Mixed"; statEnc.style.color = "var(--rd)"; }
-  }
-  updateSaltStatusUI();
+function isUpgraded(){return localStorage.getItem(UPGRADED_KEY)==='done';}
+function updateEncStatusUI(){
+  var hint=document.getElementById("enc-status-hint"),icon=document.getElementById("enc-status-icon"),stat=document.getElementById("stat-enc");if(!hint)return;
+  var ok=isUpgraded()||!DATA.length;hint.textContent=ok?"PBKDF2 + HKDF + AES-GCM v3 ✓":"Legacy records found — tap to migrate";
+  if(icon){icon.textContent=ok?"✓":"›";icon.style.color=ok?"var(--gn)":"";}if(stat){stat.textContent=ok?"PBKDF2/HKDF":"Mixed";stat.style.color=ok?"":"var(--rd)";}
+}
+function checkUpgradeNeeded(){
+  if(!DATA.length||isUpgraded())return;var existing=document.getElementById("upgrade-banner");if(existing)return;
+  var banner=document.createElement("div");banner.id="upgrade-banner";banner.className="upgrade-banner";
+  banner.innerHTML='<span>&#128274; Legacy records can be migrated to v3 (random per-record salt + IV).</span><button class="btn btn-p btn-sm" onclick="doUpgradeEncryption()">Upgrade</button><button class="btn btn-g btn-sm" onclick="dismissUpgrade()">Later</button>';
+  document.getElementById("panel-vault").insertBefore(banner,document.getElementById("acc-list"));
+}
+function dismissUpgrade(){localStorage.setItem(UPGRADED_KEY,'done');var b=document.getElementById("upgrade-banner");if(b)b.remove();updateEncStatusUI();}
+async function doUpgradeEncryption(){
+  if(!DATA.length){dismissUpgrade();return;}var b=document.getElementById("upgrade-banner"),n=await migrateAllToV3();if(b)b.remove();
+  localStorage.setItem(UPGRADED_KEY,'done');toast("Migrated "+n+" record(s) to v3");updateEncStatusUI();
 }
 
-// Trạng thái salt: đang dùng salt CŨ (dùng chung, hard-code trước đây) hay
-// đã chuyển sang salt ngẫu nhiên riêng cho vault này.
-function updateSaltStatusUI() {
-  var hint = document.getElementById("salt-status-hint");
-  var icon = document.getElementById("salt-status-icon");
-  if (!hint) return;
-  var usingLegacy = SALT_HEX === legacySaltHex();
-  if (usingLegacy) {
-    hint.textContent = t("saltStatusLegacy");
-    if (icon) { icon.textContent = t("saltRotateBtn") + " ›"; }
-  } else {
-    hint.textContent = t("saltStatusRandom");
-    if (icon) { icon.textContent = "✓"; icon.style.color = "var(--gn)"; }
-  }
-}
-
-// Chuyển từ salt CŨ (dùng chung, từng nằm công khai trong mã nguồn) sang
-// salt ngẫu nhiên RIÊNG cho vault này. An toàn: giải mã bằng khóa CŨ (salt
-// cũ), mã hóa lại bằng khóa MỚI (salt mới ngẫu nhiên) cho từng bản ghi,
-// giống hệt cơ chế đổi Master Password — chỉ khác là mật khẩu giữ nguyên,
-// chỉ salt đổi. Cập nhật cả "auth verifier" trên server vì nó cũng phụ
-// thuộc salt (xem deriveAuthHash).
-async function rotateSalt() {
-  if (!MASTER_RAW) { toast(t("bioNeedUnlock")); return; }
-  if (SALT_HEX !== legacySaltHex()) { toast(t("saltStatusRandom")); return; }
-  if (!confirm(t("saltRotateConfirm"))) return;
-
-  var icon = document.getElementById("salt-status-icon");
-  var total = DATA.length, done = 0;
-
-  try {
-    var newSaltBytes = crypto.getRandomValues(new Uint8Array(16));
-    var newSaltHex = u8ToHex(newSaltBytes);
-    var enc = new TextEncoder();
-    var km = await crypto.subtle.importKey('raw', enc.encode(MASTER_RAW), 'PBKDF2', false, ['deriveKey']);
-    var newKey = await crypto.subtle.deriveKey(
-      { name:'PBKDF2', salt: hexToU8(newSaltHex), iterations: KDF_ITER, hash:'SHA-256' },
-      km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
-    );
-
-    for (var i = 0; i < DATA.length; i++) {
-      try {
-        var cipher = await apiGet({action:'getCiphertext', id: DATA[i].id});
-        if (cipher) {
-          var decPw = await decryptData(cipher.password_encrypted);           // giải mã bằng khóa CŨ (còn hiệu lực)
-          var decN  = cipher.notes_encrypted ? await decryptData(cipher.notes_encrypted) : '';
-          await apiPost({ action:'updateAccount', payload:{
-            id: DATA[i].id,
-            password_encrypted: await encryptWithKey(decPw, newKey),          // mã hóa lại bằng khóa MỚI
-            notes_encrypted: decN ? await encryptWithKey(decN, newKey) : ''
-          }});
-        }
-      } catch(e) { /* bỏ qua bản ghi lỗi, không chặn tiến trình */ }
-      done++;
-      if (icon) icon.textContent = t("saltRotating", { n: done, total: total });
-    }
-
-    // Chỉ chuyển sang khóa mới SAU KHI đã mã hóa lại xong toàn bộ ở trên
-    DERIVED_KEY = newKey;
-    SALT_HEX = newSaltHex;
-    localStorage.setItem(SALT_CACHE_KEY, SALT_HEX);
-    await apiPost({ action:'rotateSalt', salt: SALT_HEX });
-    await updateServerVerifier(MASTER_RAW); // verifier cũng phụ thuộc salt → phải cập nhật lại
-
-    toast(t("saltRotateDone"));
-    updateSaltStatusUI();
-  } catch (e) {
-    toast(t("saltRotateFailed"));
-  }
-}
-
-function checkUpgradeNeeded() {
-  if (!DATA.length || isUpgraded()) return;
-  // Hiện banner gọn nhẹ ở đầu danh sách
-  var existing = document.getElementById("upgrade-banner");
-  if (existing) return;
-  var banner = document.createElement("div");
-  banner.id = "upgrade-banner";
-  banner.className = "upgrade-banner";
-  banner.innerHTML =
-    '<span>&#128274; ' + t("encStatusOld") + '</span>' +
-    '<button class="btn btn-p btn-sm" onclick="doUpgradeEncryption()">' + t("upgradeBtn") + '</button>' +
-    '<button class="btn btn-g btn-sm" onclick="dismissUpgrade()">' + t("cancelBtn") + '</button>';
-  var panel = document.getElementById("panel-vault");
-  var accList = document.getElementById("acc-list");
-  panel.insertBefore(banner, accList);
-}
-
-function dismissUpgrade() {
-  localStorage.setItem(UPGRADED_KEY, 'done');
-  var b = document.getElementById("upgrade-banner"); if (b) b.remove();
-  updateEncStatusUI();
-}
-
-async function doUpgradeEncryption() {
-  if (!DATA.length) { dismissUpgrade(); return; }
-  var banner = document.getElementById("upgrade-banner");
-  var total = DATA.length, done = 0;
-
-  for (var i = 0; i < DATA.length; i++) {
-    try {
-      var cipher = await apiGet({action:'getCiphertext', id: DATA[i].id});
-      if (!cipher) { done++; continue; }
-      if (cipher.password_encrypted && cipher.password_encrypted.startsWith('v2:')) { done++; continue; }
-
-      var decPw = await decryptData(cipher.password_encrypted);
-      var decN  = cipher.notes_encrypted ? await decryptData(cipher.notes_encrypted) : '';
-      if (!decPw) { done++; continue; }
-
-      await apiPost({ action:'updateAccount', payload:{
-        id: DATA[i].id,
-        password_encrypted: await encryptData(decPw),
-        notes_encrypted: decN ? await encryptData(decN) : ''
-      }});
-    } catch(e) { /* skip failed records */ }
-    done++;
-    if (banner) banner.querySelector("span").textContent =
-      "⏳ " + t("encStatusUpgrading", {n: done + "/" + total});
-  }
-
-  localStorage.setItem(UPGRADED_KEY, 'done');
-  if (banner) banner.remove();
-  toast(t("upgradeDone"));
-  updateEncStatusUI();
-}
-
-// ══════════════════════════════════════════════════════════
 // DETAIL DRAWER
 // ══════════════════════════════════════════════════════════
 function openDetail(id) {
@@ -1659,30 +1387,30 @@ function openEdit(id) {
   showPanel("add");
 }
 
-async function doSave() {
-  var service=document.getElementById("f-service").value.trim();
-  var user=document.getElementById("f-user").value.trim();
-  var pw=document.getElementById("f-pw").value;
-  var type=document.getElementById("f-type").value.trim()||t("general");
-  var url=document.getElementById("f-url").value.trim();
-  var notes=document.getElementById("f-notes").value.trim();
-  if (!service||!user){ toast(t("reqFields")); return; }
-  if (!EDIT_ID&&!pw){ toast(t("pwRequired")); return; }
-  var btn=document.getElementById("save-btn"); btn.disabled=true; btn.textContent=t("saving");
-  var finish=function(ok){ btn.disabled=false; resetForm(); if(ok){toast(t("saved"));loadAccounts();showPanel("vault");}else toast(t("saveFailed")); };
-  try {
-    if (EDIT_ID) {
-      var p={id:EDIT_ID, service_name:service, username:user, type:type, url:url};
-      if (pw) p.password_encrypted = await encryptData(pw);
-      if (notes) p.notes_encrypted = await encryptData(notes);
+async function doSave(){
+  var service=document.getElementById("f-service").value.trim(),user=document.getElementById("f-user").value.trim();
+  var pw=document.getElementById("f-pw").value,type=document.getElementById("f-type").value.trim()||t("general");
+  var url=document.getElementById("f-url").value.trim(),notes=document.getElementById("f-notes").value.trim();
+  if(!service||!user){toast(t("reqFields"));return;}if(!EDIT_ID&&!pw){toast(t("pwRequired"));return;}
+  if(pw){
+    if(passwordScore(pw)<5){toast(t("pwWeak"));return;}
+    var dup=await duplicatePassword(pw,EDIT_ID);
+    if(dup&&!confirm(t("pwDuplicate")+"\n\n"+dup.service_name+"\n\nContinue anyway?"))return;
+    var breach=await checkPwnedPassword(pw);if(breach.pwned){toast(t("pwPwned"));return;}
+    if(breach.unknown)toast(t("breachCheckFail"));
+  }
+  var btn=document.getElementById("save-btn");btn.disabled=true;btn.textContent=t("saving");
+  var finish=function(ok){btn.disabled=false;resetForm();if(ok){toast(t("saved"));loadAccounts();showPanel("vault");}else toast(t("saveFailed"));};
+  try{
+    if(EDIT_ID){
+      var p={id:EDIT_ID,service_name:service,username:user,type:type,url:url};
+      if(pw)p.password_encrypted=await encryptData(pw);if(notes)p.notes_encrypted=await encryptData(notes);
       apiPost({action:"updateAccount",payload:p}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error:"+e.message);btn.disabled=false;resetForm();});
-    } else {
-      var p2={service_name:service, username:user, type:type, url:url,
-        password_encrypted: await encryptData(pw),
-        notes_encrypted: notes ? await encryptData(notes) : ''};
+    }else{
+      var p2={service_name:service,username:user,type:type,url:url,password_encrypted:await encryptData(pw),notes_encrypted:notes?await encryptData(notes):''};
       apiPost({action:"saveAccount",payload:p2}).then(function(r){finish(r&&r.success);}).catch(function(e){toast("Error:"+e.message);btn.disabled=false;resetForm();});
     }
-  } catch(e) { toast(t("saveFailed")); btn.disabled=false; resetForm(); }
+  }catch(e){toast(t("saveFailed"));btn.disabled=false;resetForm();}
 }
 
 function resetForm(){
@@ -1775,13 +1503,15 @@ function clearImport(){IROWS=[];document.getElementById("iprev").style.display="
 // BACKUP
 // ══════════════════════════════════════════════════════════
 function doBackup(){
-  var blob=new Blob([JSON.stringify({vault:DATA,exported:new Date().toISOString(),note:"Ciphertext only - requires Master Password"},null,2)],{type:"application/json"});
-  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="myvault_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();
-  toast(t("backupDownloaded"));
+  var payload={version:3,vault:DATA,meta:META,exported:new Date().toISOString(),
+    note:"Encrypted ciphertext plus encrypted vault-key wrappers. Master Password is never exported."};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="myvault_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);toast(t("backupDownloaded"));
 }
 
-// ══════════════════════════════════════════════════════════
-// CHANGE MASTER PASSWORD (async, re-derive PBKDF2 key)
+// CHANGE MASTER PASSWORD
+// Re-wraps the random vault key; records do not need to be re-encrypted.
 // ══════════════════════════════════════════════════════════
 function showChangePw(){
   document.getElementById("dbody").innerHTML=
@@ -1796,84 +1526,29 @@ function showChangePw(){
 }
 
 async function doChangePw(){
-  var oldPw=document.getElementById("cp-old").value;
-  var newPw=document.getElementById("cp-new").value;
-  var conf =document.getElementById("cp-conf").value;
-  if(oldPw!==MASTER_RAW){toast(t("currentPwWrong"));return;}
-  if(!newPw||newPw.length<6){toast(t("newPwShort"));return;}
+  var oldPw=document.getElementById("cp-old").value,newPw=document.getElementById("cp-new").value,conf=document.getElementById("cp-conf").value;
+  if(!oldPw){toast(t("currentPwWrong"));return;}
+  if(!newPw||passwordScore(newPw)<5){toast(t("pwWeak"));return;}
   if(newPw!==conf){toast(t("pwMismatch"));return;}
-
-  var btn=document.querySelector("#dbody .btn-p"); btn.disabled=true; btn.textContent=t("reEncrypting",{n:0,total:DATA.length||0});
-
-  // Tạo PBKDF2 key mới với cùng salt hiện tại (salt không cần đổi khi đổi mật khẩu), password mới
-  var enc = new TextEncoder();
-  if (!SALT_HEX) await getOrCreateSalt();
-  var km = await crypto.subtle.importKey('raw', enc.encode(newPw), 'PBKDF2', false, ['deriveKey']);
-  var newKey = await crypto.subtle.deriveKey(
-    { name:'PBKDF2', salt:hexToU8(SALT_HEX), iterations:KDF_ITER, hash:'SHA-256' },
-    km, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
-  );
-
-  if (!DATA.length) {
-    MASTER_RAW = newPw; DERIVED_KEY = newKey;
-    await updateServerVerifier(newPw);
-    localStorage.setItem(UPGRADED_KEY, 'done');
-    invalidateBiometricAfterPwChange();
-    toast(t("doneReEncrypt",{n:0})); closeDrawer(); return;
-  }
-
-  var done=0, total=DATA.length;
-  for (var i=0; i<DATA.length; i++) {
-    try {
-      var cipher = await apiGet({action:"getCiphertext", id:DATA[i].id});
-      if (!cipher) { done++; continue; }
-      var decPw = await decryptData(cipher.password_encrypted);
-      var decN  = cipher.notes_encrypted ? await decryptData(cipher.notes_encrypted) : '';
-      var pl = {
-        id: DATA[i].id,
-        password_encrypted: await encryptWithKey(decPw, newKey),
-        notes_encrypted:    decN ? await encryptWithKey(decN, newKey) : ''
-      };
-      await apiPost({action:'updateAccount', payload:pl});
-    } catch(e) { /* skip */ }
-    done++;
-    if (btn) btn.textContent = t("reEncrypting",{n:done, total:total});
-  }
-
-  MASTER_RAW = newPw; DERIVED_KEY = newKey;
-  await updateServerVerifier(newPw);
-  localStorage.setItem(UPGRADED_KEY, 'done');
-  invalidateBiometricAfterPwChange();
-  toast(t("doneReEncrypt",{n:done}));
-  closeDrawer();
-  updateEncStatusUI();
+  var breach=await checkPwnedPassword(newPw);if(breach.pwned){toast(t("pwPwned"));return;}
+  var btn=document.querySelector("#dbody .btn-p");if(btn){btn.disabled=true;btn.textContent=t("reEncrypting",{n:1,total:1});}
+  try{
+    // Verify the current password by unwrapping the existing vault key.
+    var oldKey=await derivePasswordKey(oldPw,b64ToU8(META.salt));
+    var raw=await unwrapRawKey(META.passwordWrap,oldKey);
+    var verifiedVaultKey=await importVaultKey(raw);
+    var currentRaw=new Uint8Array(await crypto.subtle.exportKey("raw",VAULT_KEY));
+    if(u8ToHex(raw)!==u8ToHex(currentRaw)) throw new Error("Current password incorrect");
+    await changePasswordWrap(newPw);
+    MASTER_RAW='';LEGACY_KEY=null;
+    toast(t("doneReEncrypt",{n:DATA.length}));closeDrawer();updateSecurityStatus();
+  }catch(e){
+    toast(e.message==="Current password incorrect"?t("currentPwWrong"):t("saveFailed")+": "+e.message);
+  }finally{if(btn){btn.disabled=false;btn.textContent=t("changePwBtn");}}
 }
 
-// Cập nhật "auth verifier" trên server sau khi đổi Master Password, để lần
-// unlock TIẾP THEO (sau khi lock) sẽ đòi đúng mật khẩu mới. Phiên hiện tại
-// (SESSION_TOKEN) vẫn còn hiệu lực bình thường vì nó không phụ thuộc mật khẩu —
-// đây là điểm khác biệt cốt lõi so với AUTH_TOKEN suy trực tiếp từ mật khẩu trước đây.
-async function updateServerVerifier(newPw) {
-  try {
-    var newAuthHash = await deriveAuthHash(newPw, SALT_HEX);
-    await apiPost({ action:'setVerifier', authHash: newAuthHash });
-  } catch(e) { /* nếu lỗi mạng, verifier cũ vẫn còn — người dùng có thể thử đổi lại sau */ }
-}
-
-// Sau khi đổi Master Password, bản wrap sinh trắc học cũ (mã hóa mật khẩu CŨ)
-// không còn dùng được nữa. Tắt nó đi để tránh mở khóa sinh trắc học nạp nhầm
-// mật khẩu cũ; người dùng chỉ cần bật lại trong Settings (1 chạm).
-function invalidateBiometricAfterPwChange() {
-  if (localStorage.getItem(BIO_WRAPPED_KEY)) {
-    localStorage.removeItem(BIO_WRAPPED_KEY);
-    localStorage.removeItem(BIO_CRED_KEY);
-    updateBioUI();
-    toast(t("bioDisabled") + " — " + (LANG==='vi' ? 'đổi mật khẩu, hãy bật lại trong Cài đặt.' : 'password changed, re-enable it in Settings.'));
-  }
-}
-
-// ══════════════════════════════════════════════════════════
 // DRAWER / UTILS
+
 // ══════════════════════════════════════════════════════════
 function openDrawer(){document.getElementById("dov").classList.add("open");}
 function closeDrawer(){document.getElementById("dov").classList.remove("open");}
@@ -1921,16 +1596,14 @@ window.toggleEye          = toggleEye;
 window.setLang            = setLang;
 window.closeDrawer        = closeDrawer;
 window.doUpgradeEncryption= doUpgradeEncryption;
-window.rotateSalt         = rotateSalt;
+  window.setupPasskey        = setupPasskey;
+  window.unlockWithPasskey   = unlockWithPasskey;
+  window.setupTotp           = setupTotp;
 window.dismissUpgrade     = dismissUpgrade;
 window.loadAccounts       = loadAccounts;
 window.setSort            = setSort;
 window.toggleSortMenu     = toggleSortMenu;
 window.closeSortMenu      = closeSortMenu;
-window.toggleBiometric    = toggleBiometric;
-window.enableBiometric    = enableBiometric;
-window.biometricUnlock    = biometricUnlock;
-window.disableBiometric   = disableBiometric;
 
 })(); // end IIFE
 </script>
